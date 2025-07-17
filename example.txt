@@ -1,2 +1,0 @@
-Hello, It's a sample.
-This is a demonstration of file input/output.
