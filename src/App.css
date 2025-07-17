@@ -1,0 +1,558 @@
+/* Medieval Dragon App CSS */
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Uncial+Antiqua&family=MedievalSharp&display=swap');
+
+:root {
+  --primary-gold: #d4af37;
+  --dark-gold: #b8941f;
+  --medieval-red: #8b0000;
+  --deep-red: #5c0000;
+  --parchment: #f4e8d0;
+  --old-parchment: #e6d7b8;
+  --dark-stone: #2c2c2c;
+  --stone: #4a4a4a;
+  --light-stone: #6b6b6b;
+  --shadow: rgba(0, 0, 0, 0.8);
+  --fire-orange: #ff4500;
+  --ember-red: #cc3300;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Cinzel', serif;
+  background: linear-gradient(135deg, var(--dark-stone) 0%, #1a1a1a 50%, var(--dark-stone) 100%);
+  background-attachment: fixed;
+  color: var(--parchment);
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(139, 0, 0, 0.1) 0%, transparent 50%),
+    linear-gradient(45deg, transparent 30%, rgba(74, 74, 74, 0.05) 50%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Medieval Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Uncial Antiqua', serif;
+  text-shadow: 2px 2px 4px var(--shadow);
+}
+
+.main-title {
+  font-size: 4rem;
+  color: var(--primary-gold);
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.main-title::before,
+.main-title::after {
+  content: '⚔️';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 3rem;
+  color: var(--medieval-red);
+}
+
+.main-title::before {
+  left: -4rem;
+}
+
+.main-title::after {
+  right: -4rem;
+}
+
+/* Medieval Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* Medieval Card Styling */
+.dragon-card {
+  background: linear-gradient(145deg, var(--stone) 0%, var(--dark-stone) 50%, var(--stone) 100%);
+  border: 3px solid var(--primary-gold);
+  border-radius: 15px;
+  padding: 1.5rem;
+  margin: 1rem;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  box-shadow: 
+    0 8px 16px var(--shadow),
+    inset 0 1px 0 rgba(212, 175, 55, 0.3);
+  backdrop-filter: blur(5px);
+}
+
+.dragon-card::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  background: linear-gradient(45deg, var(--primary-gold), var(--dark-gold), var(--primary-gold));
+  border-radius: 15px;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.dragon-card:hover::before {
+  opacity: 1;
+}
+
+.dragon-card:hover {
+  transform: translateY(-10px) scale(1.05);
+  box-shadow: 
+    0 15px 30px var(--shadow),
+    0 0 20px rgba(212, 175, 55, 0.4);
+}
+
+.dragon-card::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.dragon-image-framef{
+    position: relative;
+  /* border: 4px solid var(--primary-gold); */
+  border-radius: 10px;
+  overflow: visible ;
+  margin-bottom: 1rem;
+  /* background: linear-gradient(45deg, var(--dark-stone), var(--stone)); */
+  display: flex;
+  justify-content: center;
+  max-width: 60%;
+  margin-left: 310px;
+}
+
+/* Medieval Image Frame */
+.dragon-image-frame {
+  position: relative;
+  /* border: 4px solid var(--primary-gold); */
+  border-radius: 10px;
+  overflow: visible ;
+  margin-bottom: 1rem;
+  /* background: linear-gradient(45deg, var(--dark-stone), var(--stone)); */
+  display: flex;
+  justify-content: center;
+}
+
+.dragon-image-frame::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* background: linear-gradient(45deg, transparent 30%, rgba(0, 0, 0, 0.275) 50%, transparent 90%); */
+  pointer-events: none;
+  z-index: 1;
+}
+
+.dragon-imagef {
+  width: 100%;
+  height: 300px;
+  object-fit:contain;
+  filter: sepia(20%) contrast(1.1) brightness(1.1);
+  transition: all 0.3s ease;
+}
+
+.dragon-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  filter: sepia(20%) contrast(1.1) brightness(1.1);
+  transition: all 0.3s ease;
+}
+
+.dragon-card:hover .dragon-image {
+  filter: sepia(30%) contrast(1.2) brightness(1.2);
+  transform: scale(1.1);
+}
+
+/* Medieval Button Styling */
+.medieval-button {
+  background: linear-gradient(145deg, var(--medieval-red), var(--deep-red));
+  color: var(--parchment);
+  border: 2px solid var(--primary-gold);
+  padding: 0.8rem 2rem;
+  border-radius: 8px;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  position: relative;
+  overflow: hidden;
+  zoom: 50%;
+}
+
+.back-button-medieval-button{
+  background: linear-gradient(145deg, var(--medieval-red), var(--deep-red));
+  color: var(--parchment);
+  border: 2px solid var(--primary-gold);
+  /* padding: 0.8rem 2rem; */
+  border-radius: 8px;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  position: relative;
+  /* overflow: hidden; */
+  height: 3rem;
+  width: 3.3rem;
+  zoom: 70%;
+  /* margin-left: -1; */
+}
+
+.medieval-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.medieval-button:hover::before {
+  left: 100%;
+}
+
+.medieval-button:hover {
+  background: linear-gradient(145deg, var(--fire-orange), var(--ember-red));
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 12px var(--shadow),
+    0 0 15px rgba(255, 69, 0, 0.3);
+}
+
+/* Medieval Navigation */
+.nav-button {
+  background: linear-gradient(145deg, var(--medieval-red), var(--deep-red));
+  border: 1.9px solid var(--primary-gold);
+  color: var(--primary-gold);
+  padding: 5px;
+  border-radius: 70%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+height: 45px;}
+
+.nav-button:hover {
+  background: linear-gradient(145deg, var(--primary-gold), var(--dark-gold));
+  color: var(--dark-stone);
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+}
+
+.nav-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Medieval Pagination */
+.pagination-dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--stone);
+  border: 2px solid var(--primary-gold);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.pagination-dot::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--primary-gold);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.pagination-dot.active::before {
+  opacity: 1;
+}
+
+.pagination-dot:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+/* Medieval Detail View */
+.detail-container {
+  background: linear-gradient(145deg, var(--stone) 0%, var(--dark-stone) 50%, var(--stone) 100%);
+  border: 4px solid var(--primary-gold);
+  border-radius: 20px;
+  padding: 2rem;
+  position: relative;
+  box-shadow: 
+    0 20px 40px var(--shadow),
+    inset 0 1px 0 rgba(212, 175, 55, 0.3);
+}
+
+.detail-container::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  right: 15px;
+  bottom: 15px;
+  border: 2px solid rgba(212, 175, 55, 0.3);
+  border-radius: 15px;
+  pointer-events: none;
+}
+
+.detail-title {
+  font-size: 3rem;
+  color: var(--primary-gold);
+  text-align: center;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.detail-title::before,
+.detail-title::after {
+  /* content: '🐉'; */
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2rem;
+  color: var(--medieval-red);
+}
+
+.detail-title::before {
+  left: -3rem;
+}
+
+.detail-title::after {
+  right: -3rem;
+}
+
+.detail-section {
+  background: linear-gradient(145deg, rgba(74, 74, 74, 0.3), rgba(44, 44, 44, 0.3));
+  border: 2px solid rgba(212, 175, 55, 0.3);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 100%;
+  margin-left: auto;
+}
+
+.detail-section h3 {
+  color: var(--primary-gold);
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+  font-family: 'Cinzel', serif;
+}
+
+.detail-section p {
+  color: var(--parchment);
+  line-height: 1.6;
+  font-size: 1.1rem;
+}
+
+/* Medieval Loading Screen */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--dark-stone) 0%, #1a1a1a 50%, var(--dark-stone) 100%);
+}
+
+.loading-spinner {
+  width: 80px;
+  height: 80px;
+  border: 4px solid var(--stone);
+  border-top: 4px solid var(--primary-gold);
+  border-radius: 50%;
+  animation: medieval-spin 1s linear infinite;
+  margin-bottom: 2rem;
+}
+
+@keyframes medieval-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: 1.8rem;
+  color: var(--primary-gold);
+  font-family: 'Uncial Antiqua', serif;
+  text-shadow: 2px 2px 4px var(--shadow);
+}
+
+/* Medieval Scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--dark-stone);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(145deg, var(--primary-gold), var(--dark-gold));
+  border-radius: 10px;
+  border: 2px solid var(--dark-stone);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(145deg, var(--dark-gold), var(--primary-gold));
+}
+
+/* Medieval Responsive Design */
+@media (max-width: 768px) {
+  .main-title {
+    font-size: 2.5rem;
+  }
+  
+  .main-title::before,
+  .main-title::after {
+    display: none;
+  }
+  
+  .detail-title {
+    font-size: 2rem;
+  }
+  
+  .detail-title::before,
+  .detail-title::after {
+    display: none;
+  }
+  
+  .dragon-card {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .container {
+    padding: 1rem;
+  }
+}
+
+/* Medieval Animations */
+@keyframes flame-flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes ember-glow {
+  0%, 100% { box-shadow: 0 0 10px rgba(255, 69, 0, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(255, 69, 0, 0.6); }
+}
+
+.dragon-card:hover {
+animation: ember-glow 0.5s ease-in-out infinite alternate;
+}
+
+/* Medieval Text Effects */
+.medieval-text {
+  background: linear-gradient(45deg, var(--primary-gold), var(--parchment), var(--primary-gold));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: golden-shimmer 3s ease-in-out infinite;
+}
+
+@keyframes golden-shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Medieval Borders */
+.medieval-border {
+  border-image: linear-gradient(45deg, var(--primary-gold), var(--dark-gold), var(--primary-gold)) 1;
+  border-width: 3px;
+  border-style: solid;
+}
+
+/* Medieval Card Count */
+.card-count {
+  text-align: center;
+  margin-top: 4rem;
+  color: var(--primary-gold);
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  text-shadow: 1px 1px 2px var(--shadow);
+}
+
+.carousel-cards {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.carousel-card {
+  background: rgba(30, 41, 59, 0.5);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  border: 2px solid #22d3ee44;
+  cursor: pointer;
+  transition: transform 0.4s, box-shadow 0.4s, opacity 0.4s;
+  width: 20rem;
+  min-width: 20rem;
+}
+
+.carousel-card.center {
+  transform: scale(1.1);
+  z-index: 10;
+  box-shadow: 0 0 40px #22d3ee55;
+  opacity: 1;
+  border-color: #eed622;
+}
+
+.carousel-card.side {
+  transform: scale(0.7);
+  opacity: 0.7;
+}
