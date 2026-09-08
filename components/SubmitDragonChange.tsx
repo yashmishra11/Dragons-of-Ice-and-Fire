@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
-import { Dragon } from "../types/dragon";
+import { Dragon } from "@/types/dragon";
 
 type Props = {
   dragon: Dragon;
@@ -18,8 +18,7 @@ export default function SubmitDragonChange({ dragon }: Props) {
   const [submitted, setSubmitted] = useState(false);
 
   function handleChange<K extends keyof Dragon>(key: K, value: Dragon[K]) {
-    const trimmed =
-      typeof value === "string" ? value.trim() : value;
+    const trimmed = typeof value === "string" ? value.trim() : value;
 
     setForm((prev) => {
       if (typeof trimmed === "string" && trimmed === "") {
@@ -36,22 +35,22 @@ export default function SubmitDragonChange({ dragon }: Props) {
 
   function handleSubmit() {
     if (!user) {
-      setError("Please log in to submit a correction.");
+      setError("Please log in using the header panel to submit a correction.");
       return;
     }
 
     if (!reason.trim()) {
-      setError("Please provide a reason for the change.");
+      setError("Please state a historical rationale / reason for this correction.");
       return;
     }
 
     if (Object.keys(form).length === 0) {
-      setError("Please fill at least one field to suggest a change.");
+      setError("Please fill in at least one field to propose a correction.");
       return;
     }
 
     const submission = {
-      id: crypto.randomUUID(),
+      id: `sub-${Date.now().toString().slice(-6)}`,
       type: "edit-dragon",
       dragonId: dragon.id,
       proposedChanges: form,
@@ -64,7 +63,7 @@ export default function SubmitDragonChange({ dragon }: Props) {
       createdAt: new Date().toISOString(),
     };
 
-    console.log("SUBMISSION:", submission);
+    console.log("DRAGON CORRECTION SUBMITTED:", submission);
 
     setSubmitted(true);
     setError(null);
@@ -72,85 +71,113 @@ export default function SubmitDragonChange({ dragon }: Props) {
 
   if (submitted) {
     return (
-      <div className="mt-6 rounded-lg bg-zinc-900 p-4 text-sm text-zinc-300">
-        Thank you! Your suggestion has been submitted for review.
+      <div className="mt-6 rounded-xl bg-amber-950/30 border border-amber-500/40 p-4 text-sm text-amber-200 flex items-center gap-3 animate-fade-in shadow-xl">
+        <span className="text-xl">✨</span>
+        <div>
+          <p className="font-semibold font-cinzel">Correction Recorded for Archmaester Review</p>
+          <p className="text-xs text-amber-300/80 mt-0.5">
+            Thank you! Your proposed edit for <span className="font-bold">{dragon.name}</span> has been logged to the review queue.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mt-10">
+    <div className="mt-6">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="text-sm text-zinc-400 hover:text-white transition"
+        className="inline-flex items-center gap-2 text-xs font-semibold text-zinc-400 hover:text-amber-300 bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 hover:border-amber-500/40 px-3.5 py-2 rounded-xl transition-all shadow-md"
       >
-        Submit a correction
+        <span>✍️</span>
+        <span>{open ? "Close Correction Form" : "Suggest Lore Correction"}</span>
       </button>
 
       {open && (
-        <div className="mt-4 rounded-xl border border-zinc-800 bg-zinc-950 p-4 space-y-4">
-          <h3 className="text-sm font-semibold text-white">
-            Suggest a correction
-          </h3>
+        <div className="mt-4 rounded-2xl border border-amber-900/40 bg-zinc-950 p-5 space-y-4 shadow-2xl backdrop-blur-xl animate-fade-in">
+          <div className="flex items-center justify-between border-b border-zinc-900 pb-3">
+            <h3 className="text-sm font-bold font-cinzel text-amber-300 flex items-center gap-2">
+              <span>📜</span> Propose Revision for {dragon.name}
+            </h3>
+            {!user && (
+              <span className="text-[11px] text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800/60">
+                Notice: Viewer login required to submit
+              </span>
+            )}
+          </div>
 
-          <Field
-            label="Rider"
-            placeholder={dragon.rider ?? ""}
-            onChange={(v) => handleChange("rider", v)}
-          />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Field
+              label="Rider"
+              placeholder={dragon.rider || "Enter new rider..."}
+              onChange={(v) => handleChange("rider", v)}
+            />
 
-          <Field
-            label="Colors"
-            placeholder={dragon.colors ?? ""}
-            onChange={(v) => handleChange("colors", v)}
-          />
+            <Field
+              label="Colors & Features"
+              placeholder={dragon.colors || "Enter colors..."}
+              onChange={(v) => handleChange("colors", v)}
+            />
 
-          <Field
-            label="Hatched"
-            placeholder={dragon.hatched ?? ""}
-            onChange={(v) => handleChange("hatched", v)}
-          />
+            <Field
+              label="Hatched Date"
+              placeholder={dragon.hatched || "Enter hatched date..."}
+              onChange={(v) => handleChange("hatched", v)}
+            />
 
-          <Field
-            label="Died"
-            placeholder={dragon.died ?? ""}
-            onChange={(v) => handleChange("died", v)}
-          />
+            <Field
+              label="Died Date / Status"
+              placeholder={dragon.died || "Enter status..."}
+              onChange={(v) => handleChange("died", v)}
+            />
+          </div>
 
           <TextArea
-            label="Description"
-            placeholder={dragon.description ?? ""}
+            label="Description Revision"
+            placeholder={dragon.description || "Updated physical description..."}
             onChange={(v) => handleChange("description", v)}
           />
 
           <TextArea
-            label="History"
-            placeholder={dragon.history ?? ""}
+            label="Historical Chronicle Revision"
+            placeholder={dragon.history || "Updated lore history..."}
             onChange={(v) => handleChange("history", v)}
           />
 
           <div>
-            <label className="block text-xs text-zinc-400 mb-1">
-              Reason for change *
+            <label className="block text-xs font-semibold text-zinc-300 mb-1 font-cinzel">
+              Reason / Source Citation *
             </label>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-sm text-white"
-              rows={3}
+              placeholder="e.g. Fire & Blood Chapter 12 states..."
+              className="w-full rounded-xl bg-zinc-900/90 border border-zinc-800 focus:border-amber-500/50 p-2.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none transition-all"
+              rows={2}
             />
           </div>
 
           {error && (
-            <p className="text-xs text-red-400">{error}</p>
+            <div className="text-xs text-red-400 bg-red-950/50 border border-red-900/60 p-2.5 rounded-lg flex items-center gap-2">
+              <span>⚠️</span>
+              <span>{error}</span>
+            </div>
           )}
 
-          <button
-            onClick={handleSubmit}
-            className="text-sm bg-white text-black px-3 py-1.5 rounded hover:bg-zinc-200 transition"
-          >
-            Submit for review
-          </button>
+          <div className="flex justify-end gap-2 pt-2 border-t border-zinc-900">
+            <button
+              onClick={() => setOpen(false)}
+              className="px-3 py-1.5 rounded-lg text-xs text-zinc-400 hover:text-white transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="text-xs font-semibold bg-gradient-to-r from-amber-600 to-red-700 hover:from-amber-500 hover:to-red-600 text-white px-4 py-1.5 rounded-lg transition-all shadow-md shadow-amber-900/30 border border-amber-500/30"
+            >
+              Submit to Citadel Review
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -168,12 +195,12 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-xs text-zinc-400 mb-1">{label}</label>
+      <label className="block text-[11px] font-medium text-zinc-400 mb-1 font-cinzel">{label}</label>
       <input
         type="text"
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-sm text-white"
+        className="w-full rounded-lg bg-zinc-900/90 border border-zinc-800 focus:border-amber-500/50 p-2 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none transition-all"
       />
     </div>
   );
@@ -190,12 +217,12 @@ function TextArea({
 }) {
   return (
     <div>
-      <label className="block text-xs text-zinc-400 mb-1">{label}</label>
+      <label className="block text-[11px] font-medium text-zinc-400 mb-1 font-cinzel">{label}</label>
       <textarea
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded bg-zinc-900 border border-zinc-800 p-2 text-sm text-white"
-        rows={4}
+        className="w-full rounded-lg bg-zinc-900/90 border border-zinc-800 focus:border-amber-500/50 p-2.5 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none transition-all"
+        rows={3}
       />
     </div>
   );

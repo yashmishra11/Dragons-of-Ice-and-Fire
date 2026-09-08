@@ -1,9 +1,11 @@
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import dragons from "@/data/dragons.json";
 import { Dragon } from "@/types/dragon";
 import HistoryToggle from "@/components/HistoryToggle";
 import SubmitDragonChange from "@/components/SubmitDragonChange";
+import DragonImage from "@/components/DragonImage";
 
 type PageProps = {
   params: Promise<{
@@ -14,69 +16,162 @@ type PageProps = {
 export default async function DragonPage({ params }: PageProps) {
   const { id } = await params;
 
-  const dragon = (dragons as Dragon[]).find(
-    (d) => d.id === id
-  );
+  const dragonList = dragons as Dragon[];
+  const currentIndex = dragonList.findIndex((d) => d.id === id);
 
-  if (!dragon) {
+  if (currentIndex === -1) {
     notFound();
   }
 
+  const dragon = dragonList[currentIndex];
+  const prevDragon = dragonList[currentIndex - 1] || dragonList[dragonList.length - 1];
+  const nextDragon = dragonList[currentIndex + 1] || dragonList[0];
+
+  const isAlive = Boolean(dragon.died && dragon.died.toLowerCase().includes("alive"));
+
+  const isBlendedImage =
+    dragon.name.toLowerCase() === "cannibal" ||
+    dragon.image.toLowerCase().includes("cannibal") ||
+    dragon.image.toLowerCase().includes("greyghost");
+
   return (
-    <main className="min-h-screen bg-black text-white px-6 py-12">
-      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
+    <main className="min-h-screen bg-[#08070b] text-white px-4 sm:px-8 py-8 sm:py-12">
+      <div className="max-w-6xl mx-auto space-y-8">
         
-        {/* LEFT: Image */}
-        <div className="relative w-full aspect-square bg-zinc-900 rounded-xl overflow-hidden">
-          {dragon.image ? (
-            <Image
-              src={dragon.image}
-              alt={dragon.name}
-              fill
-              className="object-contain"
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full text-zinc-500">
-              No image available
-            </div>
-          )}
+        {/* Navigation Bar */}
+        <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-amber-300 font-medium transition-colors group px-3 py-1.5 rounded-full bg-zinc-900/60 border border-zinc-800 hover:border-amber-500/40"
+          >
+            <span className="group-hover:-translate-x-1 transition-transform">←</span>
+            Back to Interactive Map
+          </Link>
+
+          <div className="flex items-center gap-2 text-xs">
+            <Link
+              href={`/dragons/${prevDragon.id}`}
+              className="px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 hover:border-zinc-600 text-zinc-300 hover:text-white transition-colors"
+            >
+              ← {prevDragon.name}
+            </Link>
+            <Link
+              href={`/dragons/${nextDragon.id}`}
+              className="px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 hover:border-zinc-600 text-zinc-300 hover:text-white transition-colors"
+            >
+              {nextDragon.name} →
+            </Link>
+          </div>
         </div>
 
-        {/* RIGHT: Info */}
-        <div className="space-y-6">
-          <h1 className="text-4xl font-bold">{dragon.name}</h1>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* LEFT: Dragon Image Card (5 Cols) */}
+          <div className="lg:col-span-5 relative w-full aspect-square bg-gradient-to-b from-zinc-900/90 to-zinc-950/90 border border-amber-900/30 rounded-2xl p-6 overflow-hidden shadow-2xl flex flex-col items-center justify-center fire-glow">
+            <div className="absolute inset-0 bg-radial from-amber-500/5 to-transparent pointer-events-none" />
+            
+            {dragon.image ? (
+              <DragonImage
+                src={dragon.image}
+                alt={dragon.name}
+                priority
+                isBlendedImage={isBlendedImage}
+                className={`max-h-[380px] w-auto object-contain transition-transform duration-500 hover:scale-105 ${
+                  !isBlendedImage ? "filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)]" : ""
+                }`}
+              />
+            ) : (
+              <div className="flex flex-col items-center gap-2 text-zinc-500 font-cinzel">
+                <span className="text-4xl">🐉</span>
+                No portrait recorded in Citadel archives
+              </div>
+            )}
 
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <Info label="Rider" value={dragon.rider} />
-            <Info label="Colors" value={dragon.colors} />
-            <Info label="Hatched" value={dragon.hatched} />
-            <Info label="Died" value={dragon.died} />
+            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between bg-black/70 backdrop-blur-md px-4 py-2 rounded-xl border border-zinc-800">
+              <span className="text-xs text-zinc-400 font-cinzel">Vault Registry ID</span>
+              <span className="text-xs font-mono font-bold text-amber-400">#{dragon.id}</span>
+            </div>
           </div>
 
-          <section>
-            <h2 className="text-lg font-semibold mb-2">Description</h2>
-            <p className="text-zinc-300 leading-relaxed">
-              {dragon.description}
-            </p>
-          </section>
+          {/* RIGHT: Lore & Specifications (7 Cols) */}
+          <div className="lg:col-span-7 space-y-6 bg-zinc-950/50 border border-zinc-900 p-6 sm:p-8 rounded-2xl backdrop-blur-md">
+            
+            {/* Header Title & Status */}
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-zinc-900 pb-4">
+              <div>
+                <h1 className="text-3xl sm:text-5xl font-cinzel font-bold tracking-wider bg-gradient-to-r from-amber-200 via-amber-400 to-red-400 bg-clip-text text-transparent">
+                  {dragon.name}
+                </h1>
+                <p className="text-xs text-zinc-400 mt-1 uppercase tracking-widest font-cinzel">
+                  {dragon.side === "left" ? "Eastern Dragonmont Lineage" : "Western Westeros Legend"}
+                </p>
+              </div>
 
-          <section>
-            <h2 className="text-lg font-semibold mb-2">History</h2>
-            <HistoryToggle text={dragon.history || "Unknown"} />
-            <SubmitDragonChange dragon={dragon} />
+              {isAlive ? (
+                <span className="bg-emerald-950/80 text-emerald-300 border border-emerald-700/60 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  Active / Alive
+                </span>
+              ) : (
+                <span className="bg-zinc-900 text-zinc-400 border border-zinc-800 px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wider">
+                  Deceased / Historic
+                </span>
+              )}
+            </div>
 
-          </section>
+            {/* Quick Stat Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <InfoCard icon="👑" label="Rider" value={dragon.rider} />
+              <InfoCard icon="🎨" label="Scales & Flame" value={dragon.colors} />
+              <InfoCard icon="🥚" label="Hatched" value={dragon.hatched} />
+              <InfoCard icon="⚔️" label="Died / Status" value={dragon.died} />
+            </div>
+
+            {/* Description */}
+            <section className="space-y-2 pt-2">
+              <h2 className="text-base font-cinzel font-bold text-amber-300 flex items-center gap-2">
+                <span>📜</span> Description & Physicality
+              </h2>
+              <p className="text-zinc-300 text-sm leading-relaxed bg-zinc-900/40 p-4 rounded-xl border border-zinc-900">
+                {dragon.description}
+              </p>
+            </section>
+
+            {/* History Chronicle */}
+            <section className="space-y-2 pt-2">
+              <h2 className="text-base font-cinzel font-bold text-amber-300 flex items-center gap-2">
+                <span>📚</span> Historical Chronicle
+              </h2>
+              <div className="bg-zinc-900/40 p-4 rounded-xl border border-zinc-900">
+                <HistoryToggle text={dragon.history || "No historical chronicle exists for this dragon."} />
+              </div>
+            </section>
+
+            {/* Submit Correction Component */}
+            <div className="pt-4 border-t border-zinc-900">
+              <SubmitDragonChange dragon={dragon} />
+            </div>
+
+          </div>
+
         </div>
+
       </div>
     </main>
   );
 }
 
-function Info({ label, value }: { label: string; value: string | undefined }) {
+function InfoCard({ icon, label, value }: { icon: string; label: string; value: string | undefined }) {
   return (
-    <div className="bg-zinc-900 rounded-lg p-3">
-      <p className="text-zinc-400 text-xs">{label}</p>
-      <p className="font-medium">{value || "Unknown"}</p>
+    <div className="bg-zinc-900/80 border border-zinc-800/80 rounded-xl p-3 flex flex-col justify-between">
+      <div className="flex items-center gap-1.5 text-zinc-400 text-xs mb-1">
+        <span>{icon}</span>
+        <span className="font-cinzel text-[11px] font-medium">{label}</span>
+      </div>
+      <p className="text-xs font-medium text-zinc-200 line-clamp-2" title={value || "Unknown"}>
+        {value || "Unknown"}
+      </p>
     </div>
   );
 }
