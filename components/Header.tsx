@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import LoginPanel from "@/components/LoginPanel";
+import HeaderLogo from "@/components/HeaderLogo";
 import dragons from "@/data/dragons.json";
 
 export default function Header() {
@@ -20,7 +21,6 @@ export default function Header() {
   const handleSelectDragon = (dragonId: string) => {
     setSearchTerm("");
     setIsOpen(false);
-    // If on homepage, attempt to scroll to dragon element
     const element = document.getElementById(`dragon-${dragonId}`);
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -28,31 +28,27 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-black/85 backdrop-blur-xl border-b border-amber-900/30 px-4 sm:px-6 py-2 transition-all">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
+    <header className="sticky top-0 z-50 bg-black/90 backdrop-blur-2xl border-b border-amber-900/40 px-3 sm:px-6 py-2 transition-all shadow-2xl">
+      <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 sm:gap-4">
         
-        {/* Left Branding */}
+        {/* Left: Valyrian Crest & Brand Logo */}
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-red-900 via-amber-600 to-amber-400 p-0.5 shadow-md shadow-amber-900/30 group-hover:scale-105 transition-transform">
-            <div className="w-full h-full bg-black rounded-full flex items-center justify-center">
-              <span className="text-amber-400 text-lg">🐉</span>
-            </div>
-          </div>
+          <HeaderLogo />
           <div>
-            <span className="font-cinzel font-bold text-lg sm:text-xl tracking-wider bg-gradient-to-r from-amber-200 via-amber-400 to-red-400 bg-clip-text text-transparent group-hover:from-amber-100 group-hover:to-red-300 transition-colors">
+            <span className="font-cinzel font-bold text-lg sm:text-xl tracking-wider bg-gradient-to-r from-amber-200 via-amber-400 to-red-400 bg-clip-text text-transparent group-hover:from-amber-100 group-hover:to-red-300 transition-colors drop-shadow-sm">
               DRAGONS OF ICE & FIRE
             </span>
-            <span className="block text-[10px] text-zinc-400 tracking-widest uppercase">
+            <span className="block text-[9px] text-zinc-400 tracking-widest uppercase font-cinzel font-semibold">
               Westeros Lore & Compendium
             </span>
           </div>
         </Link>
 
-        {/* Center Search Bar */}
-        <div className="relative w-full max-w-xs sm:max-w-sm">
+        {/* Center: Search Bar */}
+        <div className="relative flex-1 max-w-xs sm:max-w-sm">
           <div className="relative">
             <svg
-              className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none"
+              className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-500/70 pointer-events-none"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -73,14 +69,14 @@ export default function Header() {
                 setIsOpen(true);
               }}
               onFocus={() => setIsOpen(true)}
-              className="w-full bg-zinc-900/90 border border-zinc-800 focus:border-amber-500/60 text-xs text-zinc-200 placeholder-zinc-500 rounded-full pl-9 pr-4 py-2 focus:outline-none transition-all shadow-inner"
+              className="w-full bg-zinc-900/90 border border-zinc-800 focus:border-amber-500/80 focus:ring-1 focus:ring-amber-500/40 text-xs text-zinc-200 placeholder-zinc-500 rounded-full pl-10 pr-4 py-2 focus:outline-none transition-all shadow-inner"
             />
           </div>
 
           {/* Search Dropdown */}
           {isOpen && filteredDragons.length > 0 && (
             <div
-              className="absolute left-0 right-0 mt-2 bg-zinc-950 border border-amber-900/40 rounded-xl shadow-2xl overflow-hidden z-50 backdrop-blur-xl"
+              className="absolute left-0 right-0 mt-2 bg-zinc-950/95 border border-amber-900/50 rounded-xl shadow-2xl overflow-hidden z-50 backdrop-blur-xl"
               onMouseLeave={() => setIsOpen(false)}
             >
               {filteredDragons.map((dragon) => (
@@ -109,15 +105,32 @@ export default function Header() {
           )}
         </div>
 
-        {/* Right Nav & Auth Panel */}
-        <div className="flex items-center gap-3">
+        {/* Right Nav & User Panel */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Link
+            href="/"
+            className="hidden lg:flex items-center gap-1.5 text-xs font-cinzel font-bold text-zinc-300 hover:text-white hover:bg-zinc-900 px-3 py-1.5 rounded-full transition-all border border-transparent hover:border-zinc-800"
+          >
+            <span>🗺️</span>
+            <span>Map</span>
+          </Link>
+
+          <Link
+            href="/timeline"
+            className="flex items-center gap-1.5 text-xs font-cinzel font-bold text-amber-300 hover:text-amber-200 bg-amber-950/50 hover:bg-amber-900/70 border border-amber-700/40 hover:border-amber-600/60 px-3 py-1.5 rounded-full transition-all shadow-md"
+          >
+            <span>📜</span>
+            <span>Timeline</span>
+          </Link>
+
           <Link
             href="/compare"
-            className="flex items-center gap-1.5 text-xs font-cinzel font-bold text-amber-300 hover:text-amber-200 bg-amber-950/40 hover:bg-amber-900/60 border border-amber-600/40 hover:border-amber-500/60 px-3 py-1.5 rounded-full transition-all shadow-md"
+            className="flex items-center gap-1.5 text-xs font-cinzel font-bold text-red-300 hover:text-red-200 bg-red-950/40 hover:bg-red-900/60 border border-red-700/40 hover:border-red-600/60 px-3 py-1.5 rounded-full transition-all shadow-md"
           >
             <span>⚔️</span>
-            <span>Compare Dragons</span>
+            <span className="hidden sm:inline">Compare</span>
           </Link>
+
           <LoginPanel />
         </div>
 

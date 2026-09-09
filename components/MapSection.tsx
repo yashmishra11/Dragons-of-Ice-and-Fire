@@ -54,29 +54,14 @@ export default function MapSection({ dragons }: MapSectionProps) {
 
   return (
     <div className="relative w-full bg-[#08070b]">
-      {/* Ultra-Slim Single-Line Sticky Controls Bar (42px total height) */}
-      <div className="sticky top-[53px] z-40 flex items-center justify-between px-3 sm:px-6 py-1.5 bg-black/90 backdrop-blur-md border-b border-zinc-800/80 text-xs shadow-xl">
+      {/* Clean Single-Row House Allegiance Sticky Toolbar */}
+      <div className="sticky top-[53px] z-40 bg-zinc-950/95 backdrop-blur-xl border-b border-amber-900/40 px-3 sm:px-6 py-2 shadow-2xl flex flex-wrap items-center justify-between gap-2 text-xs">
         
-        {/* Left: Era Dropdown */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-amber-400 font-cinzel font-bold text-[11px] hidden sm:inline">
-            Era:
+        {/* Left: Allegiance House Quick Filter Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+          <span className="text-[11px] font-cinzel font-bold text-amber-400/90 tracking-wider uppercase mr-1 hidden sm:inline">
+            Allegiance:
           </span>
-          <select
-            value={eraFilter}
-            onChange={(e) => setEraFilter(e.target.value as EraId)}
-            className="bg-zinc-900 border border-zinc-800 focus:border-amber-500/50 text-[11px] text-amber-300 font-cinzel rounded-lg px-2 py-1 focus:outline-none cursor-pointer"
-          >
-            {(Object.keys(ERAS) as EraId[]).map((eId) => (
-              <option key={eId} value={eId}>
-                {ERAS[eId].icon} {ERAS[eId].title} ({ERAS[eId].years})
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Center: Allegiance Quick Pills */}
-        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5 max-w-xl">
           {(Object.keys(FACTIONS) as FactionId[]).map((fId) => {
             const fac = FACTIONS[fId];
             const isActive = factionFilter === fId;
@@ -85,34 +70,45 @@ export default function MapSection({ dragons }: MapSectionProps) {
               <button
                 key={fId}
                 onClick={() => setFactionFilter(fId)}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-cinzel transition-all whitespace-nowrap ${
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-cinzel transition-all whitespace-nowrap cursor-pointer ${
                   isActive
-                    ? fac.colorClass + " border shadow"
-                    : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900 border border-transparent"
+                    ? fac.colorClass + " border border-amber-400/60 shadow-[0_0_12px_rgba(245,158,11,0.25)] font-bold scale-[1.02]"
+                    : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/80 border border-zinc-800/80 bg-zinc-950/80 font-medium"
                 }`}
                 title={fac.description}
               >
                 <span>{fac.sigil}</span>
-                <span className="hidden md:inline ml-1 font-semibold">{fac.name}</span>
+                <span className="font-semibold">{fac.name}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Right: Counter & Reset */}
-        <div className="flex items-center gap-2">
+        {/* Right: Link to Dedicated Timeline Page + Counter & Reset */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Link
+            href="/timeline"
+            className="flex items-center gap-1.5 text-[11px] font-cinzel font-bold text-amber-300 hover:text-amber-100 bg-amber-950/60 hover:bg-amber-900/80 border border-amber-700/50 px-3 py-1 rounded-lg transition-all shadow-md"
+          >
+            <span>📜</span>
+            <span>Historical Eras →</span>
+          </Link>
+
           {isFiltered && (
             <button
               onClick={() => {
                 setFactionFilter("all");
                 setEraFilter("all");
               }}
-              className="text-[10px] text-red-400 hover:text-red-300 font-bold bg-red-950/40 hover:bg-red-900/60 px-2 py-0.5 rounded border border-red-800/40 transition-colors"
+              className="text-[11px] font-cinzel text-red-400 hover:text-red-300 font-bold bg-red-950/50 hover:bg-red-900/70 px-2 py-1 rounded-lg border border-red-800/60 transition-all cursor-pointer flex items-center gap-1"
+              title="Reset all active filters"
             >
-              Reset ✕
+              <span>Reset</span>
+              <span className="text-[10px]">✕</span>
             </button>
           )}
-          <span className="text-[10px] font-mono font-bold text-amber-300 bg-amber-950/70 border border-amber-800/50 px-2 py-0.5 rounded-full">
+
+          <span className="text-[11px] font-mono font-bold text-amber-300 bg-amber-950/80 border border-amber-700/60 px-2.5 py-1 rounded-full shadow-md whitespace-nowrap">
             {filteredDragons.length} dragons
           </span>
         </div>
