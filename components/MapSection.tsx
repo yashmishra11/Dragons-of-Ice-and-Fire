@@ -194,37 +194,67 @@ export default function MapSection({ dragons }: MapSectionProps) {
               <div
                 key={dragon.id}
                 id={`dragon-${dragon.id}`}
-                className="absolute transition-all duration-500 z-10 hover:z-30 will-change-transform"
+                className="absolute inset-x-0 w-full transition-all duration-500 z-10 hover:z-30 group will-change-transform pointer-events-none"
                 style={{
                   top: `${topPosition}px`,
-                  left: sideLeft ? "5%" : "95%",
-                  transform: sideLeft ? "translateX(0)" : "translateX(-100%)",
+                  height: "220px",
                 }}
               >
-                <Link
-                  href={`/dragons/${dragon.id}`}
-                  className="dragon-card-link group flex flex-col items-center pointer-events-auto cursor-pointer"
-                >
-                  {/* Visual Dragon Image Container with Smooth Scaling */}
-                  <div className="relative flex items-center justify-center p-1.5 transition-transform duration-300 group-hover:scale-110">
-                    <DragonImage
-                      dragonId={dragon.id}
-                      src={dragon.image}
-                      alt={dragon.name}
-                      priority={index < 4}
-                      className="dragon-clipart h-[150px] sm:h-[175px] md:h-[185px] max-w-[290px] w-auto object-contain pointer-events-auto"
-                      style={{
-                        transform: `scale(${normalizedScale})`,
-                        transformOrigin: "center center",
-                      }}
-                    />
+                {/* Horizontal Running Cartographic Line across the middle section */}
+                <div className="absolute inset-x-0 top-[135px] flex items-center pointer-events-none z-0">
+                  {/* Delicate glowing gold cartographic rule */}
+                  <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-amber-500/25 to-transparent group-hover:via-amber-400/50 transition-colors duration-300 shadow-[0_0_8px_rgba(245,158,11,0.15)]" />
+                  
+                  {/* Subtle antique diamond pip at center */}
+                  <div className="absolute left-1/2 -translate-x-1/2 text-[9px] text-amber-500/40 group-hover:text-amber-400/80 transition-colors font-serif select-none">
+                    ◆
                   </div>
+                </div>
 
-                  {/* Dragon Label & Badge */}
-                  <div className="mt-1.5 flex flex-col items-center gap-1 transition-all duration-300 group-hover:-translate-y-1">
-                    <div className="flex items-center gap-1.5 bg-zinc-950/95 border border-amber-500/30 group-hover:border-amber-400 px-3 py-1 rounded-full shadow-xl">
+                {/* Dragon Clipart Image on the Flank (Left or Right) */}
+                <div
+                  className={`absolute top-0 ${
+                    sideLeft
+                      ? "left-[2%] sm:left-[4%] md:left-[5%]"
+                      : "right-[2%] sm:right-[4%] md:right-[5%]"
+                  } pointer-events-auto z-10`}
+                >
+                  <Link
+                    href={`/dragons/${dragon.id}`}
+                    className="dragon-card-link flex flex-col items-center cursor-pointer"
+                  >
+                    <div className="relative flex items-center justify-center p-1.5 transition-transform duration-300 group-hover:scale-110">
+                      <DragonImage
+                        dragonId={dragon.id}
+                        src={dragon.image}
+                        alt={dragon.name}
+                        priority={index < 4}
+                        className="dragon-clipart h-[145px] sm:h-[170px] md:h-[180px] max-w-[280px] w-auto object-contain pointer-events-auto"
+                        style={{
+                          transform: `scale(${normalizedScale})`,
+                          transformOrigin: "center center",
+                        }}
+                      />
+                    </div>
+                  </Link>
+                </div>
+
+                {/* Dragon Name & Badges: Moved on TOP of the horizontal running line in the middle section */}
+                <div
+                  className={`absolute bottom-[91px] ${
+                    sideLeft
+                      ? "left-[22%] sm:left-[25%] md:left-[28%]"
+                      : "right-[22%] sm:right-[25%] md:right-[28%]"
+                  } pointer-events-auto z-20 transition-all duration-300 group-hover:-translate-y-1`}
+                >
+                  <Link
+                    href={`/dragons/${dragon.id}`}
+                    className="flex flex-col items-center gap-1 cursor-pointer"
+                  >
+                    {/* Antique Plaque resting directly atop the horizontal line */}
+                    <div className="flex items-center gap-1.5 bg-zinc-950/95 border border-amber-500/40 group-hover:border-amber-400 px-3.5 py-1 rounded-full shadow-[0_4px_14px_rgba(0,0,0,0.85),0_0_10px_rgba(245,158,11,0.2)] transition-all">
                       <span className="text-xs">{faction.sigil}</span>
-                      <span className="font-cinzel font-bold text-xs sm:text-sm text-amber-200 group-hover:text-amber-100 whitespace-nowrap">
+                      <span className="font-cinzel font-bold text-xs sm:text-sm text-amber-200 group-hover:text-amber-100 tracking-wider uppercase whitespace-nowrap">
                         {dragon.name}
                       </span>
                       <span className={`text-[9px] px-1.5 py-0.2 rounded font-semibold uppercase ${faction.badgeClass}`}>
@@ -232,12 +262,15 @@ export default function MapSection({ dragons }: MapSectionProps) {
                       </span>
                     </div>
 
-                    {/* Rider subtitle on hover */}
-                    <span className="text-[11px] text-zinc-300 bg-zinc-900/95 px-2 py-0.5 rounded border border-zinc-800 opacity-90 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md">
+                    {/* Rider subtitle */}
+                    <span className="text-[10px] sm:text-[11px] text-zinc-300 bg-zinc-900/95 px-2.5 py-0.5 rounded border border-zinc-800/80 opacity-90 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md">
                       {isWild ? "Unbound Dragon" : `Rider: ${dragon.rider}`}
                     </span>
-                  </div>
-                </Link>
+
+                    {/* Antique gold anchor peg touching the line */}
+                    <div className="w-[1px] h-[5px] bg-amber-500/60 -mb-[5px]" />
+                  </Link>
+                </div>
               </div>
             );
           })
