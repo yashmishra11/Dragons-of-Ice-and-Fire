@@ -9,12 +9,18 @@ type Props = {
 };
 
 export default function SubmitDragonChange({ dragon }: Props) {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+
+  // Strict role check: Admin and Visitor cannot see or access the submit button
+  if (role !== "viewer" || !user) {
+    return null;
+  }
 
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [form, setForm] = useState<Partial<Dragon>>({});
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   function handleChange<K extends keyof Dragon>(key: K, value: Dragon[K]) {
@@ -33,14 +39,14 @@ export default function SubmitDragonChange({ dragon }: Props) {
     });
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
     if (!user) {
-      setError("Please log in using the header panel to submit a correction.");
+      setError("Please log in as a Citadel member to propose a correction.");
       return;
     }
 
     if (!reason.trim()) {
-      setError("Please state a historical rationale / reason for this correction.");
+      setError("Please state a historical rationale / source citation for this correction.");
       return;
     }
 
@@ -49,24 +55,32 @@ export default function SubmitDragonChange({ dragon }: Props) {
       return;
     }
 
-    const submission = {
-      id: `sub-${Date.now().toString().slice(-6)}`,
-      type: "edit-dragon",
-      dragonId: dragon.id,
-      proposedChanges: form,
-      reason: reason.trim(),
-      submittedBy: {
-        userId: user.id,
-        email: user.email,
-      },
-      status: "pending",
-      createdAt: new Date().toISOString(),
-    };
-
-    console.log("DRAGON CORRECTION SUBMITTED:", submission);
-
-    setSubmitted(true);
+    setLoading(true);
     setError(null);
+
+    try {
+      const res = await fetch("/api/submissions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          dragonId: dragon.id,
+          dragonName: dragon.name,
+          proposedChanges: form,
+          reason: reason.trim(),
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Failed to submit correction to Citadel.");
+      } else {
+        setSubmitted(true);
+      }
+    } catch (err) {
+      setError("Network error communicating with the Citadel archives.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (submitted) {
@@ -173,9 +187,17 @@ export default function SubmitDragonChange({ dragon }: Props) {
             </button>
             <button
               onClick={handleSubmit}
-              className="text-xs font-semibold bg-gradient-to-r from-amber-600 to-red-700 hover:from-amber-500 hover:to-red-600 text-white px-4 py-1.5 rounded-lg transition-all shadow-md shadow-amber-900/30 border border-amber-500/30"
+              disabled={loading}
+              className="text-xs font-semibold bg-gradient-to-r from-amber-600 to-red-700 hover:from-amber-500 hover:to-red-600 text-white px-4 py-1.5 rounded-lg transition-all shadow-md shadow-amber-900/30 border border-amber-500/30 disabled:opacity-50 flex items-center gap-1.5"
             >
-              Submit to Citadel Review
+              {loading ? (
+                <>
+                  <span className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  <span>Recording in Vault...</span>
+                </>
+              ) : (
+                <span>Submit to Citadel Review</span>
+              )}
             </button>
           </div>
         </div>

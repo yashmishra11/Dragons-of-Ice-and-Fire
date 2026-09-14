@@ -1,0 +1,14 @@
+[
+  {
+    "id": "usr_jonsnow_001",
+    "actualName": "Yash Mishra",
+    "username": "Jonsnow",
+    "age": 23,
+    "email": "mr.yashofficial1102@gmail.com",
+    "phone": "8827895934",
+    "role": "admin",
+    "passwordHash": "0f0f63f6185faf5ef50cf3d1a6e5cd0d:2b6ed9f93dd00c887fe91f17c7f39ca79a1ce71ae1c4f75ddaf8d2b7f01269795e4f1e4396bce382d9e42248a4f332863434a9244bcb94c398224c947a5ef376",
+    "createdAt": "2026-09-14T13:23:00.927Z",
+    "updatedAt": "2026-09-14T13:23:00.934Z"
+  }
+]

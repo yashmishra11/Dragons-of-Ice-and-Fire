@@ -1,87 +1,130 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import dragons from "@/data/dragons.json";
-import { submissions as initialSubmissions } from "@/data/submissions";
 import { Dragon } from "@/types/dragon";
 import { DragonChangeSubmission } from "@/types/submission";
 import { AdminGuard } from "@/components/AdminGuard";
 
+type SectionTab = "submitted" | "accepted" | "discarded";
+
 function SubmissionCard({
   submission,
   dragons,
-  onApprove,
-  onReject,
+  onAcknowledge,
+  onDiscard,
+  onDeletePermanently,
+  actionLoadingId,
 }: {
   submission: DragonChangeSubmission;
   dragons: Dragon[];
-  onApprove: () => void;
-  onReject: () => void;
+  onAcknowledge: (id: string) => void;
+  onDiscard: (id: string) => void;
+  onDeletePermanently: (id: string) => void;
+  actionLoadingId: string | null;
 }) {
-  const dragon = dragons.find((d) => d.id === submission.dragonId || d.name.toLowerCase() === submission.dragonId.toLowerCase()) ?? null;
-  const isPending = submission.status === "pending";
+  const dragon =
+    dragons.find(
+      (d) =>
+        d.id.toLowerCase() === submission.dragonId.toLowerCase() ||
+        d.name.toLowerCase() === submission.dragonId.toLowerCase()
+    ) ?? null;
+
+  const isSubmitted =
+    submission.status === "submitted" || submission.status === "pending";
+  const isAccepted =
+    submission.status === "accepted" || submission.status === "approved";
+  const isDiscarded =
+    submission.status === "discarded" || submission.status === "rejected";
+
+  const isLoading = actionLoadingId === submission.id;
 
   const changes = submission.proposedChanges || {};
   const changeEntries = Object.entries(changes);
 
+  const submitterDisplay =
+    submission.submittedBy?.username ||
+    submission.submittedBy?.actualName ||
+    "Citadel Scribe";
+
   return (
-    <div className="bg-zinc-950/80 border border-zinc-800/80 hover:border-amber-900/40 rounded-2xl p-6 shadow-xl space-y-4 backdrop-blur-md transition-all">
-      {/* Header info */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-900 pb-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-amber-950/60 border border-amber-600/40 flex items-center justify-center font-bold text-amber-400 font-cinzel">
+    <div className="bg-[#0d0c13]/90 border border-zinc-800/90 hover:border-amber-900/50 rounded-2xl p-6 shadow-2xl space-y-4 backdrop-blur-xl transition-all">
+      {/* Header Info */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800/80 pb-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-full bg-gradient-to-br from-amber-600/30 to-amber-950/80 border border-amber-500/40 flex items-center justify-center font-bold text-amber-300 text-xl shadow-inner font-cinzel">
             🐉
           </div>
           <div>
             <div className="flex items-center gap-2">
               <h2 className="font-cinzel font-bold text-lg text-zinc-100">
-                {dragon ? dragon.name : `Dragon ID: ${submission.dragonId}`}
+                {submission.dragonName || (dragon ? dragon.name : `Dragon ID: ${submission.dragonId}`)}
               </h2>
-              <span className="text-xs text-zinc-500 font-mono">({submission.id})</span>
+              <span className="text-[10px] text-zinc-500 font-mono">({submission.id})</span>
             </div>
             <p className="text-xs text-zinc-400">
-              Submitted by <span className="text-amber-300 font-medium">{submission.submittedBy?.email || "Anonymous"}</span> • {new Date(submission.createdAt).toLocaleDateString()}
+              Submitted by{" "}
+              <span className="text-amber-300 font-medium">@{submitterDisplay}</span>{" "}
+              <span className="text-zinc-500 font-mono">({submission.submittedBy?.email})</span> •{" "}
+              {new Date(submission.createdAt).toLocaleDateString(undefined, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })}
             </p>
           </div>
         </div>
 
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-            submission.status === "pending"
-              ? "bg-amber-950/80 text-amber-300 border border-amber-700/60 animate-pulse"
-              : submission.status === "approved"
-              ? "bg-emerald-950/80 text-emerald-300 border border-emerald-700/60"
-              : "bg-rose-950/80 text-rose-300 border border-rose-700/60"
-          }`}
-        >
-          {submission.status}
-        </span>
+        {/* Status Pill */}
+        <div>
+          {isSubmitted && (
+            <span className="px-3 py-1 rounded-full text-xs font-cinzel font-bold tracking-wider uppercase bg-amber-950/80 text-amber-300 border border-amber-500/50 animate-pulse">
+              📜 Submitted (Pending Review)
+            </span>
+          )}
+          {isAccepted && (
+            <span className="px-3 py-1 rounded-full text-xs font-cinzel font-bold tracking-wider uppercase bg-emerald-950/80 text-emerald-300 border border-emerald-600/60 shadow-sm">
+              ✨ Accepted & Acknowledged
+            </span>
+          )}
+          {isDiscarded && (
+            <span className="px-3 py-1 rounded-full text-xs font-cinzel font-bold tracking-wider uppercase bg-zinc-900 text-zinc-400 border border-zinc-700">
+              🗑️ Discarded
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Field Changes Table */}
       <div className="space-y-2">
-        <p className="text-xs font-cinzel font-bold text-zinc-400 uppercase tracking-wider">
+        <p className="text-[11px] font-cinzel font-bold text-zinc-400 uppercase tracking-wider">
           Proposed Modifications ({changeEntries.length}):
         </p>
 
-        <div className="overflow-x-auto rounded-xl border border-zinc-900 bg-zinc-900/40">
+        <div className="overflow-x-auto rounded-xl border border-zinc-800/80 bg-zinc-950/60">
           <table className="w-full text-left text-xs text-zinc-300">
             <thead className="bg-zinc-900/90 text-zinc-400 font-cinzel border-b border-zinc-800">
               <tr>
-                <th className="p-2.5">Field</th>
-                <th className="p-2.5">Current Archival Value</th>
-                <th className="p-2.5">Proposed Correction</th>
+                <th className="p-3 w-1/4">Field</th>
+                <th className="p-3 w-3/8">Current Archival Record</th>
+                <th className="p-3 w-3/8">Proposed Correction</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-900 font-sans">
+            <tbody className="divide-y divide-zinc-900/80 font-sans">
               {changeEntries.map(([key, val]) => {
                 const currentValue = dragon ? (dragon as any)[key] : "Unknown";
                 return (
-                  <tr key={key} className="hover:bg-zinc-900/50">
-                    <td className="p-2.5 font-semibold text-amber-400 capitalize">{key}</td>
-                    <td className="p-2.5 text-zinc-400 max-w-xs truncate">{currentValue || "None / Blank"}</td>
-                    <td className="p-2.5 text-emerald-300 bg-emerald-950/20 font-medium max-w-xs truncate">{String(val)}</td>
+                  <tr key={key} className="hover:bg-zinc-900/40 transition-colors">
+                    <td className="p-3 font-semibold text-amber-400 capitalize font-cinzel text-[11px]">
+                      {key}
+                    </td>
+                    <td className="p-3 text-zinc-400 text-xs">
+                      {currentValue || <span className="italic text-zinc-600">None / Blank</span>}
+                    </td>
+                    <td className="p-3 text-emerald-300 bg-emerald-950/15 font-medium text-xs">
+                      {String(val)}
+                    </td>
                   </tr>
                 );
               })}
@@ -90,39 +133,85 @@ function SubmissionCard({
         </div>
       </div>
 
-      {/* Reason section */}
-      <div className="bg-zinc-900/60 p-3 rounded-xl border border-zinc-800/80 text-xs">
-        <span className="font-cinzel font-semibold text-amber-300">Citation / Rationale: </span>
-        <span className="text-zinc-300 italic">{submission.reason}</span>
+      {/* Citation / Rationale */}
+      <div className="bg-zinc-900/70 p-3.5 rounded-xl border border-zinc-800/80 text-xs space-y-1">
+        <span className="font-cinzel font-bold text-amber-300 block text-[11px]">
+          📜 Scholar Citation / Historical Rationale:
+        </span>
+        <p className="text-zinc-200 italic font-serif leading-relaxed">
+          "{submission.reason}"
+        </p>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex items-center justify-between pt-2 border-t border-zinc-900">
-        {dragon && (
+      {/* Accepted note dispatch info */}
+      {isAccepted && (
+        <div className="flex items-center gap-2 text-xs text-emerald-400/90 bg-emerald-950/30 border border-emerald-800/40 p-2.5 rounded-xl">
+          <span>💌</span>
+          <span>
+            Royal raven dispatched! A sweet acknowledgement letter was sent to{" "}
+            <strong className="text-emerald-300 font-mono">{submission.submittedBy?.email}</strong>.
+          </span>
+        </div>
+      )}
+
+      {/* Action Buttons Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-zinc-900">
+        {dragon ? (
           <Link
             href={`/dragons/${dragon.id}`}
-            className="text-xs text-zinc-400 hover:text-amber-300 transition-colors"
+            className="text-xs text-zinc-400 hover:text-amber-300 transition-colors flex items-center gap-1 font-cinzel"
           >
-            Inspect Dragon File →
+            <span>Inspect Dragon File</span>
+            <span>→</span>
           </Link>
+        ) : (
+          <span />
         )}
 
-        <div className="flex gap-2">
-          <button
-            onClick={onApprove}
-            disabled={!isPending}
-            className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white transition-all shadow-md shadow-emerald-900/20"
-          >
-            Approve Revision
-          </button>
+        <div className="flex items-center gap-2">
+          {/* Action buttons for SUBMITTED cards */}
+          {isSubmitted && (
+            <>
+              <button
+                onClick={() => onDiscard(submission.id)}
+                disabled={isLoading}
+                className="px-4 py-2 rounded-xl text-xs font-cinzel font-bold text-zinc-400 hover:text-red-300 bg-zinc-900 hover:bg-red-950/40 border border-zinc-800 hover:border-red-800/50 transition-all disabled:opacity-50 flex items-center gap-1.5"
+              >
+                <span>🗑️</span>
+                <span>Discard</span>
+              </button>
 
-          <button
-            onClick={onReject}
-            disabled={!isPending}
-            className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-rose-600 hover:bg-rose-500 disabled:opacity-40 text-white transition-all shadow-md shadow-rose-900/20"
-          >
-            Reject Revision
-          </button>
+              <button
+                onClick={() => onAcknowledge(submission.id)}
+                disabled={isLoading}
+                className="px-5 py-2 rounded-xl text-xs font-cinzel font-bold text-white bg-gradient-to-r from-amber-600 via-amber-500 to-emerald-600 hover:from-amber-500 hover:to-emerald-500 transition-all shadow-lg shadow-amber-950/40 border border-amber-400/40 disabled:opacity-50 flex items-center gap-1.5"
+              >
+                {isLoading ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    <span>Dispatching Raven...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>⚔️</span>
+                    <span>Acknowledge & Accept</span>
+                  </>
+                )}
+              </button>
+            </>
+          )}
+
+          {/* Action buttons for DISCARDED cards */}
+          {isDiscarded && (
+            <button
+              onClick={() => onDeletePermanently(submission.id)}
+              disabled={isLoading}
+              className="px-4 py-2 rounded-xl text-xs font-cinzel font-bold text-red-400 hover:text-red-300 bg-red-950/30 hover:bg-red-950/60 border border-red-800/50 transition-all disabled:opacity-50 flex items-center gap-1.5"
+            >
+              <span>❌</span>
+              <span>Permanently Delete</span>
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -130,133 +219,279 @@ function SubmissionCard({
 }
 
 export default function AdminPage() {
-  const [submissions, setSubmissions] =
-    useState<DragonChangeSubmission[]>(initialSubmissions);
-  const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
+  const [submissions, setSubmissions] = useState<DragonChangeSubmission[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<SectionTab>("submitted");
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  function updateStatus(id: string, status: "approved" | "rejected") {
-    setSubmissions((prev) =>
-      prev.map((s) =>
-        s.id === id
-          ? { ...s, status, reviewedAt: new Date().toISOString() }
-          : s
-      )
-    );
-
-    setToastMessage(`Submission ${id} marked as ${status}.`);
-    setTimeout(() => setToastMessage(null), 4000);
+  // Fetch real submissions from /api/submissions
+  async function loadSubmissions() {
+    try {
+      const res = await fetch("/api/submissions");
+      if (res.ok) {
+        const data = await res.json();
+        setSubmissions(data.submissions || []);
+      }
+    } catch (err) {
+      console.error("Error loading submissions:", err);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  const filteredSubmissions = submissions.filter((s) => {
-    if (statusFilter === "all") return true;
-    return s.status === statusFilter;
-  });
+  useEffect(() => {
+    loadSubmissions();
+  }, []);
 
-  const pendingCount = submissions.filter((s) => s.status === "pending").length;
-  const approvedCount = submissions.filter((s) => s.status === "approved").length;
-  const rejectedCount = submissions.filter((s) => s.status === "rejected").length;
+  // Action: Acknowledge & Accept
+  async function handleAcknowledge(id: string) {
+    setActionLoadingId(id);
+    try {
+      const res = await fetch(`/api/submissions/${id}/acknowledge`, {
+        method: "POST",
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setToastMessage(`⚠️ Error: ${data.error || "Failed to acknowledge"}`);
+      } else {
+        // Update local state: move to accepted
+        setSubmissions((prev) =>
+          prev.map((s) => (s.id === id ? { ...s, status: "accepted" } : s))
+        );
+        setToastMessage(
+          `✨ Contribution acknowledged! A sweet royal thank-you letter was dispatched to ${data.submission?.submittedBy?.email || "the contributor"}.`
+        );
+      }
+    } catch (err) {
+      setToastMessage("⚠️ Network error while dispatching acknowledgment raven.");
+    } finally {
+      setActionLoadingId(null);
+      setTimeout(() => setToastMessage(null), 6000);
+    }
+  }
+
+  // Action: Discard
+  async function handleDiscard(id: string) {
+    setActionLoadingId(id);
+    try {
+      const res = await fetch(`/api/submissions/${id}/discard`, {
+        method: "POST",
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setToastMessage(`⚠️ Error: ${data.error || "Failed to discard"}`);
+      } else {
+        // Update local state: move to discarded
+        setSubmissions((prev) =>
+          prev.map((s) => (s.id === id ? { ...s, status: "discarded" } : s))
+        );
+        setToastMessage("🗑️ Submission discarded and moved to the Discarded section.");
+      }
+    } catch (err) {
+      setToastMessage("⚠️ Network error while discarding submission.");
+    } finally {
+      setActionLoadingId(null);
+      setTimeout(() => setToastMessage(null), 4000);
+    }
+  }
+
+  // Action: Permanently Delete
+  async function handleDeletePermanently(id: string) {
+    if (!confirm("Are you sure you want to permanently erase this submission from the archives?")) {
+      return;
+    }
+
+    setActionLoadingId(id);
+    try {
+      const res = await fetch(`/api/submissions/${id}/delete`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setToastMessage(`⚠️ Error: ${data.error || "Failed to delete"}`);
+      } else {
+        // Remove completely from list
+        setSubmissions((prev) => prev.filter((s) => s.id !== id));
+        setToastMessage("❌ Submission permanently erased from the Citadel archives.");
+      }
+    } catch (err) {
+      setToastMessage("⚠️ Network error while erasing submission.");
+    } finally {
+      setActionLoadingId(null);
+      setTimeout(() => setToastMessage(null), 4000);
+    }
+  }
+
+  // Filter submissions by the 3 core sections requested
+  const submittedItems = submissions.filter(
+    (s) => s.status === "submitted" || s.status === "pending"
+  );
+  const acceptedItems = submissions.filter(
+    (s) => s.status === "accepted" || s.status === "approved"
+  );
+  const discardedItems = submissions.filter(
+    (s) => s.status === "discarded" || s.status === "rejected"
+  );
+
+  const currentDisplayList =
+    activeTab === "submitted"
+      ? submittedItems
+      : activeTab === "accepted"
+      ? acceptedItems
+      : discardedItems;
 
   return (
     <AdminGuard>
       <main className="min-h-screen bg-[#08070b] text-white px-4 sm:px-8 py-10">
         <div className="max-w-5xl mx-auto space-y-8">
-          
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-6">
+          {/* Header Banner */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-6">
             <div>
               <div className="flex items-center gap-3">
                 <Link
                   href="/"
-                  className="text-xs text-amber-400 hover:underline font-medium"
+                  className="text-xs text-amber-400 hover:text-amber-300 font-medium font-cinzel flex items-center gap-1 transition-colors"
                 >
-                  ← Back to Map
+                  <span>←</span>
+                  <span>Back to Realm Map</span>
                 </Link>
                 <span className="text-zinc-600">•</span>
-                <span className="text-xs text-zinc-400 uppercase tracking-widest font-cinzel">
+                <span className="text-xs text-zinc-400 uppercase tracking-widest font-cinzel font-semibold">
                   Citadel Archmaester Vault
                 </span>
               </div>
-              <h1 className="text-3xl font-cinzel font-bold text-amber-200 mt-1">
-                Admin Review Dashboard
+              <h1 className="text-3xl font-cinzel font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-red-400 mt-1">
+                Lore Review Dashboard
               </h1>
+              <p className="text-xs text-zinc-400 mt-1">
+                Review proposed chronicle revisions from verified Citadel scribes and members.
+              </p>
             </div>
 
-            {/* Filter Tabs */}
-            <div className="flex items-center gap-1 bg-zinc-950 p-1 rounded-full border border-zinc-800 text-xs">
+            {/* Section Tabs: Submitted, Accepted, Discarded */}
+            <div className="flex items-center gap-1.5 bg-zinc-950 p-1.5 rounded-2xl border border-zinc-800 shadow-xl">
               <button
-                onClick={() => setStatusFilter("all")}
-                className={`px-3 py-1 rounded-full font-medium transition-all ${
-                  statusFilter === "all"
-                    ? "bg-amber-500 text-black font-bold"
-                    : "text-zinc-400 hover:text-white"
+                onClick={() => setActiveTab("submitted")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-cinzel font-bold transition-all ${
+                  activeTab === "submitted"
+                    ? "bg-gradient-to-r from-amber-600 to-amber-500 text-black shadow-lg shadow-amber-950/40"
+                    : "text-zinc-400 hover:text-white hover:bg-zinc-900"
                 }`}
               >
-                All ({submissions.length})
+                <span>📜 Submitted</span>
+                <span
+                  className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                    activeTab === "submitted"
+                      ? "bg-black/40 text-white"
+                      : "bg-zinc-800 text-zinc-300"
+                  }`}
+                >
+                  {submittedItems.length}
+                </span>
               </button>
+
               <button
-                onClick={() => setStatusFilter("pending")}
-                className={`px-3 py-1 rounded-full font-medium transition-all ${
-                  statusFilter === "pending"
-                    ? "bg-amber-500 text-black font-bold"
-                    : "text-zinc-400 hover:text-white"
+                onClick={() => setActiveTab("accepted")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-cinzel font-bold transition-all ${
+                  activeTab === "accepted"
+                    ? "bg-emerald-600 text-white shadow-lg shadow-emerald-950/40"
+                    : "text-zinc-400 hover:text-white hover:bg-zinc-900"
                 }`}
               >
-                Pending ({pendingCount})
+                <span>✨ Accepted</span>
+                <span
+                  className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                    activeTab === "accepted"
+                      ? "bg-black/40 text-white"
+                      : "bg-zinc-800 text-zinc-300"
+                  }`}
+                >
+                  {acceptedItems.length}
+                </span>
               </button>
+
               <button
-                onClick={() => setStatusFilter("approved")}
-                className={`px-3 py-1 rounded-full font-medium transition-all ${
-                  statusFilter === "approved"
-                    ? "bg-emerald-600 text-white font-bold"
-                    : "text-zinc-400 hover:text-white"
+                onClick={() => setActiveTab("discarded")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-cinzel font-bold transition-all ${
+                  activeTab === "discarded"
+                    ? "bg-zinc-700 text-white shadow-lg"
+                    : "text-zinc-400 hover:text-white hover:bg-zinc-900"
                 }`}
               >
-                Approved ({approvedCount})
-              </button>
-              <button
-                onClick={() => setStatusFilter("rejected")}
-                className={`px-3 py-1 rounded-full font-medium transition-all ${
-                  statusFilter === "rejected"
-                    ? "bg-rose-600 text-white font-bold"
-                    : "text-zinc-400 hover:text-white"
-                }`}
-              >
-                Rejected ({rejectedCount})
+                <span>🗑️ Discarded</span>
+                <span
+                  className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                    activeTab === "discarded"
+                      ? "bg-black/40 text-white"
+                      : "bg-zinc-800 text-zinc-300"
+                  }`}
+                >
+                  {discardedItems.length}
+                </span>
               </button>
             </div>
           </div>
 
-          {/* Toast Notice */}
+          {/* Toast Notification */}
           {toastMessage && (
-            <div className="bg-amber-950/80 border border-amber-500/50 p-3 rounded-xl text-xs text-amber-200 flex items-center justify-between shadow-xl animate-fade-in">
-              <span>✨ {toastMessage}</span>
-              <button onClick={() => setToastMessage(null)} className="text-zinc-400 hover:text-white">✕</button>
+            <div className="bg-gradient-to-r from-amber-950/90 to-zinc-950 border border-amber-500/50 p-4 rounded-2xl text-xs text-amber-200 flex items-center justify-between shadow-2xl animate-fade-in">
+              <span>{toastMessage}</span>
+              <button
+                onClick={() => setToastMessage(null)}
+                className="text-zinc-400 hover:text-white ml-3 font-bold"
+              >
+                ✕
+              </button>
             </div>
           )}
 
-          {/* Submissions List */}
-          <div className="space-y-6">
-            {filteredSubmissions.length === 0 && (
-              <div className="text-center py-16 bg-zinc-950/40 rounded-2xl border border-zinc-900 space-y-2">
-                <span className="text-4xl">📜</span>
-                <p className="text-zinc-400 font-cinzel font-semibold text-sm">
-                  No submissions found for status "{statusFilter}"
-                </p>
-              </div>
-            )}
-
-            {filteredSubmissions.map((submission) => (
-              <SubmissionCard
-                key={submission.id}
-                submission={submission}
-                dragons={dragons as Dragon[]}
-                onApprove={() => updateStatus(submission.id, "approved")}
-                onReject={() => updateStatus(submission.id, "rejected")}
-              />
-            ))}
-          </div>
-
+          {/* Submissions Cards List */}
+          {loading ? (
+            <div className="text-center py-24 space-y-3">
+              <div className="w-10 h-10 border-2 border-amber-600/30 border-t-amber-400 rounded-full animate-spin mx-auto" />
+              <p className="text-xs font-cinzel text-zinc-400 tracking-widest uppercase">
+                Consulting Citadel Scrolls...
+              </p>
+            </div>
+          ) : currentDisplayList.length === 0 ? (
+            <div className="text-center py-20 bg-zinc-950/60 rounded-3xl border border-zinc-900 space-y-3 shadow-inner">
+              <span className="text-4xl block">
+                {activeTab === "submitted"
+                  ? "📜"
+                  : activeTab === "accepted"
+                  ? "👑"
+                  : "🗑️"}
+              </span>
+              <h3 className="text-zinc-200 font-cinzel font-bold text-base">
+                No suggestions in the "{activeTab}" section
+              </h3>
+              <p className="text-xs text-zinc-500 max-w-sm mx-auto">
+                {activeTab === "submitted"
+                  ? "All proposed dragon corrections have been reviewed by the Archmaesters."
+                  : activeTab === "accepted"
+                  ? "No contributions have been acknowledged yet."
+                  : "No discarded submissions in the archives."}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {currentDisplayList.map((submission) => (
+                <SubmissionCard
+                  key={submission.id}
+                  submission={submission}
+                  dragons={dragons as Dragon[]}
+                  onAcknowledge={handleAcknowledge}
+                  onDiscard={handleDiscard}
+                  onDeletePermanently={handleDeletePermanently}
+                  actionLoadingId={actionLoadingId}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </main>
     </AdminGuard>

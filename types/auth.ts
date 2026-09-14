@@ -1,7 +1,5 @@
-export type Role = "viewer" | "admin";
+import { SafeUser, UserRole } from "./user";
 
-export type User = {
-  id: string;
-  email: string;
-  role: Role;
-};
+export type Role = UserRole;
+export type ClientRole = "visitor" | "viewer" | "admin";
+export type User = SafeUser;

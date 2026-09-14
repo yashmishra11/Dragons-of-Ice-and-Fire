@@ -1,0 +1,39 @@
+[
+  {
+    "id": "sub_101",
+    "type": "edit-dragon",
+    "dragonId": "drogon",
+    "dragonName": "Drogon",
+    "proposedChanges": {
+      "rider": "Daenerys Targaryen",
+      "died": "Not confirmed / Roaming wild in Essos"
+    },
+    "reason": "Archmaester Gyldayn noted that Drogon was last seen bearing the Dragon Queen east toward the Ruins of Valyria.",
+    "submittedBy": {
+      "userId": "usr_demo_01",
+      "username": "MaesterAemon",
+      "actualName": "Aemon Targaryen",
+      "email": "mr.yashofficial1102@gmail.com"
+    },
+    "status": "submitted",
+    "createdAt": "2026-09-14T10:15:00.000Z"
+  },
+  {
+    "id": "sub_102",
+    "type": "edit-dragon",
+    "dragonId": "caraxes",
+    "dragonName": "Caraxes",
+    "proposedChanges": {
+      "colors": "Blood red scales, golden eyes, and fierce serpentine neck"
+    },
+    "reason": "Fire & Blood explicitly describes Caraxes' long, lean neck and formidable serpentine flight maneuvers at the Battle Above the Gods Eye.",
+    "submittedBy": {
+      "userId": "usr_demo_02",
+      "username": "RhaenyraLoyalist",
+      "actualName": "Corlys Velaryon",
+      "email": "mr.yashofficial1102@gmail.com"
+    },
+    "status": "submitted",
+    "createdAt": "2026-09-14T11:45:00.000Z"
+  }
+]
