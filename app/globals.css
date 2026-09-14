@@ -25,19 +25,32 @@ body {
   font-family: var(--font-cinzel);
 }
 
-/* Custom scrollbar for dragon dark theme */
+/* Sleek Valyrian Gold Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: #09090b;
+  background: rgba(9, 9, 11, 0.9);
 }
 ::-webkit-scrollbar-thumb {
-  background: #27272a;
-  border-radius: 4px;
+  background: linear-gradient(180deg, rgba(217, 119, 6, 0.5), rgba(245, 158, 11, 0.8), rgba(220, 38, 38, 0.6));
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #ca8a04;
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.9), rgba(251, 191, 36, 1), rgba(239, 68, 68, 0.9));
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.6);
+}
+
+/* Scrollbar suppression for horizontal toolbar pills */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 /* Dragon image mix-blend fix for cutouts with white/grey background patches */

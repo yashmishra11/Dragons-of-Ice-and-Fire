@@ -16,7 +16,7 @@ export default function WesterosOutlineMap() {
       <img
         src="/map/westeros-ultra-sharp.webp"
         alt="Westeros Map Background"
-        className="h-full w-auto max-w-[340px] sm:max-w-[370px] md:max-w-[390px] object-fill opacity-90 drop-shadow-[0_0_16px_rgba(245,158,11,0.22)]"
+        className="w-full h-full max-w-[1400px] object-cover object-top opacity-90 drop-shadow-[0_0_24px_rgba(245,158,11,0.18)]"
         loading="eager"
         decoding="async"
       />

@@ -161,8 +161,6 @@ export default function MapSection({ dragons }: MapSectionProps) {
                   top: `${topPosition}px`,
                   left: sideLeft ? "4%" : "92%",
                   transform: sideLeft ? "translateX(0)" : "translateX(-100%)",
-                  contentVisibility: "auto",
-                  containIntrinsicSize: "280px",
                 }}
               >
                 <Link

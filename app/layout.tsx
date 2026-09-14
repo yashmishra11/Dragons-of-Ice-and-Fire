@@ -1,5 +1,6 @@
 import { AuthProvider } from "@/components/AuthProvider";
 import Header from "@/components/Header";
+import SmoothScroll from "@/components/SmoothScroll";
 import type { Metadata } from "next";
 // @ts-ignore: CSS module type declarations are not present in this project
 import "./globals.css";
@@ -18,6 +19,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="bg-[#08070b] text-zinc-100 min-h-screen flex flex-col font-sans antialiased selection:bg-amber-500/30 selection:text-amber-200">
         <AuthProvider>
+          <SmoothScroll />
           <Header />
           <div className="flex-1">{children}</div>
           <footer className="border-t border-zinc-900 bg-black/90 py-6 text-center text-xs text-zinc-400 font-cinzel">
