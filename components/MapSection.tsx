@@ -48,16 +48,26 @@ export default function MapSection({ dragons }: MapSectionProps) {
 
   const isFiltered = factionFilter !== "all" || eraFilter !== "all";
 
-  // Dynamic section height calculation
-  const compactSectionHeight = Math.max(700, filteredDragons.length * 280 + 160);
+  // Natural proportional Westeros map height (1340x3700 natural aspect ratio 0.362)
+  const FULL_MAP_HEIGHT = 3700;
+  const FILTERED_STEP = 260;
+
+  // When filtered, compactly space selected dragons so they are NOT far apart.
+  // When 'all', display full map spanning from The Wall to Dorne with ample bottom clearance.
+  const sectionHeight = isFiltered
+    ? Math.max(750, filteredDragons.length * FILTERED_STEP + 180)
+    : FULL_MAP_HEIGHT;
 
   return (
     <div className="relative w-full bg-[#08070b]">
-      {/* Clean Single-Row House Allegiance Sticky Toolbar */}
-      <div className="sticky top-[53px] z-40 bg-zinc-950/95 backdrop-blur-xl border-b border-amber-900/40 px-3 sm:px-6 py-2 shadow-2xl flex flex-wrap items-center justify-between gap-2 text-xs">
+      {/* Sleek Single-Row House Allegiance Sticky Toolbar (No Thick Slider/Scrollbar) */}
+      <div className="sticky top-[53px] z-40 bg-zinc-950/95 backdrop-blur-xl border-b border-amber-900/30 px-3 sm:px-6 py-1.5 shadow-2xl flex flex-wrap items-center justify-between gap-2 text-xs">
         
         {/* Left: Allegiance House Quick Filter Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+        <div
+          className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 flex-nowrap"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
           <span className="text-[11px] font-cinzel font-bold text-amber-400/90 tracking-wider uppercase mr-1 hidden sm:inline">
             Allegiance:
           </span>
@@ -69,9 +79,9 @@ export default function MapSection({ dragons }: MapSectionProps) {
               <button
                 key={fId}
                 onClick={() => setFactionFilter(fId)}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[11px] font-cinzel transition-all whitespace-nowrap cursor-pointer ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-cinzel transition-all whitespace-nowrap cursor-pointer ${
                   isActive
-                    ? fac.colorClass + " border border-amber-400/60 shadow-[0_0_12px_rgba(245,158,11,0.25)] font-bold scale-[1.02]"
+                    ? fac.colorClass + " border border-amber-400/80 shadow-[0_0_10px_rgba(245,158,11,0.25)] font-bold scale-[1.02]"
                     : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/80 border border-zinc-800/80 bg-zinc-950/80 font-medium"
                 }`}
                 title={fac.description}
@@ -87,7 +97,7 @@ export default function MapSection({ dragons }: MapSectionProps) {
         <div className="flex items-center gap-2 flex-shrink-0">
           <Link
             href="/timeline"
-            className="flex items-center gap-1.5 text-[11px] font-cinzel font-bold text-amber-300 hover:text-amber-100 bg-amber-950/60 hover:bg-amber-900/80 border border-amber-700/50 px-3 py-1 rounded-lg transition-all shadow-md"
+            className="flex items-center gap-1.5 text-[11px] font-cinzel font-bold text-amber-300 hover:text-amber-100 bg-amber-950/60 hover:bg-amber-900/80 border border-amber-700/50 px-2.5 py-1 rounded-md transition-all shadow-md"
           >
             <span>📜</span>
             <span>Historical Eras →</span>
@@ -99,7 +109,7 @@ export default function MapSection({ dragons }: MapSectionProps) {
                 setFactionFilter("all");
                 setEraFilter("all");
               }}
-              className="text-[11px] font-cinzel text-red-400 hover:text-red-300 font-bold bg-red-950/50 hover:bg-red-900/70 px-2 py-1 rounded-lg border border-red-800/60 transition-all cursor-pointer flex items-center gap-1"
+              className="text-[11px] font-cinzel text-red-400 hover:text-red-300 font-bold bg-red-950/50 hover:bg-red-900/70 px-2 py-1 rounded-md border border-red-800/60 transition-all cursor-pointer flex items-center gap-1"
               title="Reset all active filters"
             >
               <span>Reset</span>
@@ -107,19 +117,19 @@ export default function MapSection({ dragons }: MapSectionProps) {
             </button>
           )}
 
-          <span className="text-[11px] font-mono font-bold text-amber-300 bg-amber-950/80 border border-amber-700/60 px-2.5 py-1 rounded-full shadow-md whitespace-nowrap">
+          <span className="text-[11px] font-mono font-bold text-amber-300 bg-amber-950/80 border border-amber-700/60 px-2.5 py-0.5 rounded-full shadow-md whitespace-nowrap">
             {filteredDragons.length} dragons
           </span>
         </div>
 
       </div>
 
-      {/* Map Graphic Container - Strictly Locked to Canonical Westeros Height */}
+      {/* Map Graphic Container - Spanning Natural Westeros Canvas */}
       <section
-        className="relative w-full overflow-hidden mx-auto max-w-[1400px]"
-        style={{ minHeight: "5350px", height: "5350px" }}
+        className="relative w-full overflow-hidden mx-auto max-w-[1340px] transition-[height] duration-500 ease-out"
+        style={{ minHeight: `${sectionHeight}px`, height: `${sectionHeight}px` }}
       >
-        {/* Minimalist Westeros Outline Map (Zero-Lag Vector Background) */}
+        {/* Proportional Westeros Outline Map (Zero-Lag Vector Background) */}
         <WesterosOutlineMap />
 
         {filteredDragons.length === 0 ? (
@@ -144,22 +154,36 @@ export default function MapSection({ dragons }: MapSectionProps) {
             const isWild = faction.id === "wild" || !dragon.rider || dragon.rider === "None" || dragon.rider.toLowerCase().includes("none");
             const normalizedScale = getNormalizedScale((dragon as any).scale);
 
-            // Keep true canonical map coordinates whether filtered or all
-            const topPosition =
+            // Raw top from dragons dataset (ranges from 140 to 5120)
+            const rawTop =
               typeof dragon.top === "number"
                 ? dragon.top
                 : parseInt(dragon.top, 10);
 
-            const sideLeft = dragon.side === "left";
+            // Reserve 350px at the bottom so the last dragons (Vhagar & Viserion)
+            // have full clearance for their image, name badge, and rider subtitle.
+            const maxDragonTop = FULL_MAP_HEIGHT - 350;
+            const START_TOP = 15;
+
+            // When filtered: compact sequential cadence so dragons are close together!
+            // When all: smoothly mapped canonical positions with minimal top dead space.
+            const topPosition = isFiltered
+              ? 20 + index * FILTERED_STEP
+              : Math.round(START_TOP + ((rawTop - 140) / (5120 - 140)) * (maxDragonTop - START_TOP));
+
+            // When filtered: alternate smoothly left/right. When all: use canonical side.
+            const sideLeft = isFiltered
+              ? index % 2 === 0
+              : dragon.side === "left";
 
             return (
               <div
                 key={dragon.id}
                 id={`dragon-${dragon.id}`}
-                className="absolute transition-transform duration-300 z-10 hover:z-30 will-change-transform"
+                className="absolute transition-all duration-500 z-10 hover:z-30 will-change-transform"
                 style={{
                   top: `${topPosition}px`,
-                  left: sideLeft ? "4%" : "92%",
+                  left: sideLeft ? "7%" : "93%",
                   transform: sideLeft ? "translateX(0)" : "translateX(-100%)",
                 }}
               >
