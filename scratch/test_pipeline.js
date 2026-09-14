@@ -1,7 +1,7 @@
 const sharp = require('sharp');
 const fs = require('fs');
 
-async function testPipeline() {
+async function generateNaturalOutlineMap() {
   const inputPath = 'public/map/westeros-outline.png';
   const img = sharp(inputPath);
   const { data, info } = await img.raw().toBuffer({ resolveWithObject: true });
@@ -9,12 +9,12 @@ async function testPipeline() {
   const h = info.height; // 1024
   const ch = info.channels;
 
-  // Let's create a line map on the original resolution
-  const lineBuf = Buffer.alloc(w * h * 4);
-
+  // Function to check if a pixel in the original image is ocean
   function isOcean(x, y) {
-    if (x < 0 || x >= w || y < 0 || y >= h) return true;
+    // IMPORTANT: Out-of-bounds is NOT ocean! Do NOT draw artificial canvas border lines!
+    if (x < 0 || x >= w || y < 0 || y >= h) return false;
     const idx = (y * w + x) * ch;
+    // Blue sea: (b - r > 20 && b > 105)
     return (data[idx + 2] - data[idx] > 20 && data[idx + 2] > 105);
   }
 
@@ -24,42 +24,49 @@ async function testPipeline() {
     return 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
   }
 
+  const lineBuf = Buffer.alloc(w * h * 4);
+
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
       const idx = (y * w + x) * 4;
       const ocean = isOcean(x, y);
 
-      // Check coastline
+      // 1. Coastline: A land pixel adjacent to an actual ocean pixel
       let isCoast = false;
       if (!ocean) {
-        // Any adjacent ocean pixel?
+        // Only trigger if an actual valid within-bounds ocean pixel is adjacent
         if (isOcean(x - 1, y) || isOcean(x + 1, y) || isOcean(x, y - 1) || isOcean(x, y + 1) ||
             isOcean(x - 1, y - 1) || isOcean(x + 1, y - 1) || isOcean(x - 1, y + 1) || isOcean(x + 1, y + 1)) {
-          isCoast = true;
+          // Exclude the very top border (y < 4) to avoid flat cut line
+          if (y >= 4) {
+            isCoast = true;
+          }
         }
       }
 
-      // Check internal line
+      // 2. Internal kingdom borders and rivers:
       let isInternal = false;
       if (!ocean && !isCoast) {
         const lum = getLum(x, y);
-        // Surrounding lum
         const surr = (getLum(x - 2, y) + getLum(x + 2, y) + getLum(x, y - 2) + getLum(x, y + 2)) / 4;
-        if (surr - lum > 8 || lum < 135) {
+        if (surr - lum > 7 || lum < 135) {
           isInternal = true;
         }
       }
 
       if (isCoast) {
+        // Fade top 20px smoothly so the far north doesn't end abruptly
+        const topFade = y < 25 ? (y / 25) : 1.0;
         lineBuf[idx] = 250;     // R
         lineBuf[idx + 1] = 185; // G
         lineBuf[idx + 2] = 55;  // B
-        lineBuf[idx + 3] = 255; // Alpha
+        lineBuf[idx + 3] = Math.floor(255 * topFade); // Alpha
       } else if (isInternal) {
-        lineBuf[idx] = 220;     // R
+        const topFade = y < 25 ? (y / 25) : 1.0;
+        lineBuf[idx] = 225;     // R
         lineBuf[idx + 1] = 140; // G
         lineBuf[idx + 2] = 35;  // B
-        lineBuf[idx + 3] = 230; // Alpha
+        lineBuf[idx + 3] = Math.floor(225 * topFade); // Alpha
       } else {
         lineBuf[idx] = 0;
         lineBuf[idx + 1] = 0;
@@ -69,16 +76,18 @@ async function testPipeline() {
     }
   }
 
-  // Now upscale this pure line map directly to 560 x 5350!
-  await sharp(lineBuf, { raw: { width: w, height: h, channels: 4 } })
+  // Upscale cleanly to 560 x 5350 using Lanczos3
+  const outBuf = await sharp(lineBuf, { raw: { width: w, height: h, channels: 4 } })
     .resize(560, 5350, {
       kernel: sharp.kernel.lanczos3,
       fit: 'fill'
     })
     .webp({ quality: 95, effort: 6 })
-    .toFile('public/map/westeros-ultra-sharp.webp');
+    .toBuffer();
 
-  console.log('Processed and upscaled cleanly to public/map/westeros-ultra-sharp.webp');
+  const targetFile = 'public/map/westeros-ultra-sharp.webp';
+  fs.writeFileSync(targetFile, outBuf);
+  console.log('Saved perfected natural Westeros outline to:', targetFile);
 }
 
-testPipeline();
+generateNaturalOutlineMap();

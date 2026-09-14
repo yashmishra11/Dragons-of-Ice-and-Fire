@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useState, useEffect } from "react";
 
 type DragonImageProps = {
@@ -19,10 +18,9 @@ export default function DragonImage({
   dragonId,
   className = "",
   style = {},
-  isBlendedImage = false,
   priority = false,
 }: DragonImageProps) {
-  const [loaded, setLoaded] = useState(false);
+  const [loaded, setLoaded] = useState(true);
   const [useDirect, setUseDirect] = useState(false);
   const [error, setError] = useState(false);
 
@@ -31,7 +29,7 @@ export default function DragonImage({
   const isLocalClean = activeSrc.startsWith("/dragons/clean/");
 
   useEffect(() => {
-    setLoaded(false);
+    setLoaded(true);
     setUseDirect(false);
     setError(false);
   }, [activeSrc]);
@@ -49,13 +47,6 @@ export default function DragonImage({
 
   return (
     <div className="relative flex items-center justify-center">
-      {/* Skeleton Loading Placeholder without harsh box borders */}
-      {!loaded && !error && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none opacity-40">
-          <span className="text-2xl animate-pulse">🐉</span>
-        </div>
-      )}
-
       {/* Fallback Display on Error */}
       {error ? (
         <div className="flex flex-col items-center justify-center p-4 bg-zinc-950/80 border border-amber-900/40 rounded-xl text-center space-y-1 z-10">
@@ -64,20 +55,13 @@ export default function DragonImage({
           <span className="text-[10px] text-zinc-500">Citadel Archive Portrait</span>
         </div>
       ) : (
-        <Image
+        <img
           src={currentSrc}
           alt={alt}
-          width={450}
-          height={320}
-          quality={85}
-          priority={priority}
-          unoptimized={isLocalClean || useDirect}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
-          onLoad={() => setLoaded(true)}
+          loading={priority ? "eager" : "lazy"}
+          decoding="async"
           onError={handleImageError}
-          className={`transition-all duration-300 ${
-            loaded ? "opacity-100 scale-100" : "opacity-0 scale-95"
-          } ${isBlendedImage ? "dragon-image-blend" : ""} ${className}`}
+          className={`dragon-clipart ${className}`}
           style={style}
         />
       )}
