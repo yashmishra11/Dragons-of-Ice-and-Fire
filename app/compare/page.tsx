@@ -103,15 +103,13 @@ export default function ComparePage() {
               >
                 {/* Visual Image & Portrait */}
                 <div className="space-y-4">
-                  <div className="relative w-full aspect-square bg-gradient-to-b from-zinc-900/80 to-zinc-950/90 border border-zinc-800 rounded-xl p-4 flex items-center justify-center fire-glow overflow-hidden">
+                  <div className="relative w-full aspect-square bg-gradient-to-b from-zinc-900/60 to-zinc-950/80 border border-zinc-800/80 rounded-xl p-4 flex items-center justify-center overflow-hidden">
                     <DragonImage
+                      dragonId={dragon.id}
                       src={dragon.image}
                       alt={dragon.name}
                       priority
-                      isBlendedImage={isBlendedImage}
-                      className={`max-h-[240px] w-auto object-contain transition-transform duration-300 hover:scale-105 ${
-                        !isBlendedImage ? "filter drop-shadow-[0_10px_15px_rgba(0,0,0,0.8)]" : ""
-                      }`}
+                      className="max-h-[240px] w-auto object-contain transition-transform duration-300 hover:scale-105 dragon-silhouette-glow"
                     />
                   </div>
 

@@ -1,12 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { Dragon } from "@/types/dragon";
 import { FACTIONS, FactionId, getDragonFaction } from "@/data/factions";
 import { ERAS, EraId, isDragonInEra } from "@/data/timeline";
 import DragonImage from "@/components/DragonImage";
+import WesterosOutlineMap from "@/components/WesterosOutlineMap";
 
 type MapSectionProps = {
   dragons: Dragon[];
@@ -32,7 +32,6 @@ function getNormalizedScale(rawScale?: number | null): number {
 export default function MapSection({ dragons }: MapSectionProps) {
   const [factionFilter, setFactionFilter] = useState<FactionId>("all");
   const [eraFilter, setEraFilter] = useState<EraId>("all");
-  const [hoveredDragon, setHoveredDragon] = useState<string | null>(null);
 
   const filteredDragons = dragons.filter((d) => {
     if (factionFilter !== "all") {
@@ -115,25 +114,13 @@ export default function MapSection({ dragons }: MapSectionProps) {
 
       </div>
 
-      {/* Map Graphic Container */}
+      {/* Map Graphic Container - Strictly Locked to Canonical Westeros Height */}
       <section
-        className="relative w-full overflow-hidden mx-auto max-w-[1400px] transition-all duration-500"
-        style={
-          isFiltered
-            ? { height: `${compactSectionHeight}px` }
-            : { aspectRatio: "1272 / 5350" }
-        }
+        className="relative w-full overflow-hidden mx-auto max-w-[1400px]"
+        style={{ minHeight: "5350px", height: "5350px" }}
       >
-        <Image
-          src="/map/bg.jpeg"
-          fill
-          className="object-cover opacity-90"
-          alt="Westeros Map Background"
-          priority
-        />
-
-        {/* Soft background vignette & blur */}
-        <div className="absolute inset-0 backdrop-blur-[2px] bg-black/20 pointer-events-none" />
+        {/* Minimalist Westeros Outline Map (Zero-Lag Vector Background) */}
+        <WesterosOutlineMap />
 
         {filteredDragons.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-64 text-center space-y-2 z-20 relative">
@@ -153,59 +140,43 @@ export default function MapSection({ dragons }: MapSectionProps) {
           </div>
         ) : (
           filteredDragons.map((dragon, index) => {
-            const isHovered = hoveredDragon === dragon.id;
             const faction = getDragonFaction(dragon.name);
             const isWild = faction.id === "wild" || !dragon.rider || dragon.rider === "None" || dragon.rider.toLowerCase().includes("none");
-            const isBlendedImage =
-              dragon.name.toLowerCase() === "cannibal" ||
-              dragon.image.toLowerCase().includes("cannibal") ||
-              dragon.image.toLowerCase().includes("greyghost");
-
             const normalizedScale = getNormalizedScale((dragon as any).scale);
 
-            // Calculate top position: map coordinates for 'all', compact flow for filtered
-            const topPosition = isFiltered
-              ? 60 + index * 280
-              : typeof dragon.top === "number"
-              ? dragon.top
-              : parseInt(dragon.top, 10);
+            // Keep true canonical map coordinates whether filtered or all
+            const topPosition =
+              typeof dragon.top === "number"
+                ? dragon.top
+                : parseInt(dragon.top, 10);
 
-            // Calculate side position: alternating left/right in compact mode, original side in full map
-            const sideLeft = isFiltered
-              ? index % 2 === 0
-              : dragon.side === "left";
+            const sideLeft = dragon.side === "left";
 
             return (
               <div
                 key={dragon.id}
                 id={`dragon-${dragon.id}`}
-                className="absolute transition-all duration-500 z-10 hover:z-30"
+                className="absolute transition-transform duration-300 z-10 hover:z-30 will-change-transform"
                 style={{
                   top: `${topPosition}px`,
                   left: sideLeft ? "4%" : "92%",
                   transform: sideLeft ? "translateX(0)" : "translateX(-100%)",
+                  contentVisibility: "auto",
+                  containIntrinsicSize: "280px",
                 }}
-                onMouseEnter={() => setHoveredDragon(dragon.id)}
-                onMouseLeave={() => setHoveredDragon(null)}
               >
                 <Link
                   href={`/dragons/${dragon.id}`}
-                  className="group flex flex-col items-center pointer-events-auto cursor-pointer"
+                  className="dragon-card-link group flex flex-col items-center pointer-events-auto cursor-pointer"
                 >
-                  {/* Visual Dragon Image Container */}
-                  <div className="relative flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+                  {/* Visual Dragon Image Container with Smooth Scaling */}
+                  <div className="relative flex items-center justify-center p-2 transition-transform duration-300 group-hover:scale-110">
                     <DragonImage
+                      dragonId={dragon.id}
                       src={dragon.image}
                       alt={dragon.name}
-                      priority={index < 6}
-                      isBlendedImage={isBlendedImage}
-                      className={`h-[180px] sm:h-[220px] max-w-[320px] w-auto object-contain ${
-                        isHovered && !isBlendedImage
-                          ? "drop-shadow-[0_0_20px_rgba(245,158,11,0.6)] brightness-110"
-                          : !isBlendedImage
-                          ? "drop-shadow-[0_8px_12px_rgba(0,0,0,0.8)]"
-                          : ""
-                      }`}
+                      priority={index < 4}
+                      className="dragon-clipart h-[180px] sm:h-[220px] max-w-[320px] w-auto object-contain pointer-events-auto"
                       style={{
                         transform: `scale(${normalizedScale})`,
                         transformOrigin: "center center",
@@ -215,7 +186,7 @@ export default function MapSection({ dragons }: MapSectionProps) {
 
                   {/* Dragon Label & Badge */}
                   <div className="mt-2 flex flex-col items-center gap-1 transition-all duration-300 group-hover:-translate-y-1">
-                    <div className="flex items-center gap-1.5 bg-black/85 backdrop-blur-md border border-amber-500/30 group-hover:border-amber-400 px-3 py-1 rounded-full shadow-xl">
+                    <div className="flex items-center gap-1.5 bg-zinc-950/95 border border-amber-500/30 group-hover:border-amber-400 px-3 py-1 rounded-full shadow-xl">
                       <span className="text-xs">{faction.sigil}</span>
                       <span className="font-cinzel font-bold text-xs sm:text-sm text-amber-200 group-hover:text-amber-100 whitespace-nowrap">
                         {dragon.name}
@@ -226,7 +197,7 @@ export default function MapSection({ dragons }: MapSectionProps) {
                     </div>
 
                     {/* Rider subtitle on hover */}
-                    <span className="text-[11px] text-zinc-300 bg-zinc-900/90 px-2 py-0.5 rounded border border-zinc-800 opacity-90 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md">
+                    <span className="text-[11px] text-zinc-300 bg-zinc-900/95 px-2 py-0.5 rounded border border-zinc-800 opacity-90 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md">
                       {isWild ? "Unbound Dragon" : `Rider: ${dragon.rider}`}
                     </span>
                   </div>

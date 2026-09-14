@@ -8,11 +8,17 @@
   --font-sans: 'Inter', sans-serif;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .font-cinzel {
@@ -40,16 +46,32 @@ body {
   filter: contrast(135%) brightness(88%);
 }
 
-/* Fire glow animation */
-@keyframes firePulse {
-  0%, 100% {
-    box-shadow: 0 0 15px rgba(217, 119, 6, 0.3), 0 0 30px rgba(185, 28, 28, 0.15);
-  }
-  50% {
-    box-shadow: 0 0 25px rgba(245, 158, 11, 0.5), 0 0 45px rgba(220, 38, 38, 0.3);
-  }
+/* Magnificent Dragon Clipart Silhouette Glow */
+.dragon-clipart {
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.85));
+  transition: filter 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: filter, transform;
 }
 
-.fire-glow {
-  animation: firePulse 3s infinite ease-in-out;
+.dragon-card-link:hover .dragon-clipart,
+.dragon-card-link:hover img,
+.dragon-clipart:hover {
+  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.95))
+          drop-shadow(0 0 22px rgba(245, 158, 11, 0.85))
+          drop-shadow(0 0 45px rgba(239, 68, 68, 0.75))
+          brightness(1.18) !important;
+}
+
+/* Fire silhouette glow for comparator */
+.dragon-silhouette-glow {
+  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.6))
+          drop-shadow(0 0 25px rgba(220, 38, 38, 0.35));
+  transition: filter 0.3s ease;
+}
+
+.dragon-silhouette-glow:hover {
+  filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.95))
+          drop-shadow(0 0 28px rgba(245, 158, 11, 0.85))
+          drop-shadow(0 0 50px rgba(239, 68, 68, 0.75))
+          brightness(1.15);
 }
