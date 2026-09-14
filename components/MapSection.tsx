@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Dragon } from "@/types/dragon";
 import { FACTIONS, FactionId, getDragonFaction } from "@/data/factions";
 import { ERAS, EraId, isDragonInEra } from "@/data/timeline";
@@ -48,14 +48,40 @@ export default function MapSection({ dragons }: MapSectionProps) {
 
   const isFiltered = factionFilter !== "all" || eraFilter !== "all";
 
-  // Natural proportional Westeros map height (1340x3700 natural aspect ratio 0.362)
-  const FULL_MAP_HEIGHT = 3700;
-  const FILTERED_STEP = 260;
+  // Canonical Westeros map height with ample breathing room for all 29 dragons
+  const FULL_MAP_HEIGHT = 5500;
+  const FILTERED_STEP = 280;
+
+  // Collision-free top coordinate mapping for all dragons in full-map mode.
+  // Enforces at least 330px vertical separation between consecutive dragons on the same side,
+  // ensuring zero card overlap and 100% visibility of all names, badges, and riders.
+  const fullMapPositions = useMemo(() => {
+    const posMap: Record<string, number> = {};
+    const CARD_MIN_GAP = 330;
+
+    for (const side of ["left", "right"] as const) {
+      const sideDragons = dragons
+        .filter((d) => d.side === side)
+        .sort((a, b) => Number(a.top) - Number(b.top));
+
+      let currentTop = side === "left" ? 35 : 180;
+      for (const d of sideDragons) {
+        const rawTop = Number(d.top);
+        const targetTop = Math.round(
+          35 + ((rawTop - 140) / (5120 - 140)) * (5100 - 35)
+        );
+        const assignedTop = Math.max(targetTop, currentTop);
+        posMap[d.id] = assignedTop;
+        currentTop = assignedTop + CARD_MIN_GAP;
+      }
+    }
+    return posMap;
+  }, [dragons]);
 
   // When filtered, compactly space selected dragons so they are NOT far apart.
-  // When 'all', display full map spanning from The Wall to Dorne with ample bottom clearance.
+  // When 'all', display full map spanning from The Wall to Dorne with ample clearance.
   const sectionHeight = isFiltered
-    ? Math.max(750, filteredDragons.length * FILTERED_STEP + 180)
+    ? Math.max(780, filteredDragons.length * FILTERED_STEP + 180)
     : FULL_MAP_HEIGHT;
 
   return (
@@ -126,7 +152,7 @@ export default function MapSection({ dragons }: MapSectionProps) {
 
       {/* Map Graphic Container - Spanning Natural Westeros Canvas */}
       <section
-        className="relative w-full overflow-hidden mx-auto max-w-[1340px] transition-[height] duration-500 ease-out"
+        className="relative w-full overflow-hidden mx-auto max-w-[1540px] transition-[height] duration-500 ease-out"
         style={{ minHeight: `${sectionHeight}px`, height: `${sectionHeight}px` }}
       >
         {/* Proportional Westeros Outline Map (Zero-Lag Vector Background) */}
@@ -154,24 +180,12 @@ export default function MapSection({ dragons }: MapSectionProps) {
             const isWild = faction.id === "wild" || !dragon.rider || dragon.rider === "None" || dragon.rider.toLowerCase().includes("none");
             const normalizedScale = getNormalizedScale((dragon as any).scale);
 
-            // Raw top from dragons dataset (ranges from 140 to 5120)
-            const rawTop =
-              typeof dragon.top === "number"
-                ? dragon.top
-                : parseInt(dragon.top, 10);
-
-            // Reserve 350px at the bottom so the last dragons (Vhagar & Viserion)
-            // have full clearance for their image, name badge, and rider subtitle.
-            const maxDragonTop = FULL_MAP_HEIGHT - 350;
-            const START_TOP = 15;
-
-            // When filtered: compact sequential cadence so dragons are close together!
-            // When all: smoothly mapped canonical positions with minimal top dead space.
+            // In filtered mode: compact alternating cadence.
+            // In full map mode: canonical collision-free positions with min 330px gap.
             const topPosition = isFiltered
-              ? 20 + index * FILTERED_STEP
-              : Math.round(START_TOP + ((rawTop - 140) / (5120 - 140)) * (maxDragonTop - START_TOP));
+              ? 35 + index * FILTERED_STEP
+              : fullMapPositions[dragon.id] ?? Number(dragon.top);
 
-            // When filtered: alternate smoothly left/right. When all: use canonical side.
             const sideLeft = isFiltered
               ? index % 2 === 0
               : dragon.side === "left";
@@ -183,7 +197,7 @@ export default function MapSection({ dragons }: MapSectionProps) {
                 className="absolute transition-all duration-500 z-10 hover:z-30 will-change-transform"
                 style={{
                   top: `${topPosition}px`,
-                  left: sideLeft ? "7%" : "93%",
+                  left: sideLeft ? "5%" : "95%",
                   transform: sideLeft ? "translateX(0)" : "translateX(-100%)",
                 }}
               >
@@ -192,13 +206,13 @@ export default function MapSection({ dragons }: MapSectionProps) {
                   className="dragon-card-link group flex flex-col items-center pointer-events-auto cursor-pointer"
                 >
                   {/* Visual Dragon Image Container with Smooth Scaling */}
-                  <div className="relative flex items-center justify-center p-2 transition-transform duration-300 group-hover:scale-110">
+                  <div className="relative flex items-center justify-center p-1.5 transition-transform duration-300 group-hover:scale-110">
                     <DragonImage
                       dragonId={dragon.id}
                       src={dragon.image}
                       alt={dragon.name}
                       priority={index < 4}
-                      className="dragon-clipart h-[180px] sm:h-[220px] max-w-[320px] w-auto object-contain pointer-events-auto"
+                      className="dragon-clipart h-[150px] sm:h-[175px] md:h-[185px] max-w-[290px] w-auto object-contain pointer-events-auto"
                       style={{
                         transform: `scale(${normalizedScale})`,
                         transformOrigin: "center center",
@@ -207,7 +221,7 @@ export default function MapSection({ dragons }: MapSectionProps) {
                   </div>
 
                   {/* Dragon Label & Badge */}
-                  <div className="mt-2 flex flex-col items-center gap-1 transition-all duration-300 group-hover:-translate-y-1">
+                  <div className="mt-1.5 flex flex-col items-center gap-1 transition-all duration-300 group-hover:-translate-y-1">
                     <div className="flex items-center gap-1.5 bg-zinc-950/95 border border-amber-500/30 group-hover:border-amber-400 px-3 py-1 rounded-full shadow-xl">
                       <span className="text-xs">{faction.sigil}</span>
                       <span className="font-cinzel font-bold text-xs sm:text-sm text-amber-200 group-hover:text-amber-100 whitespace-nowrap">

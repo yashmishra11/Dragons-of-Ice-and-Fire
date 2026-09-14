@@ -5,9 +5,9 @@ async function makeBroadMagnificentMap() {
   const inputPath = 'public/map/westeros-outline.png';
   const outputPath = 'public/map/westeros-ultra-sharp.webp';
 
-  // Target canvas: 1600 x 5200 (Ratio: 0.3077, matching canonical 1272x4000 Westeros chart)
+  // Target canvas: 1600 x 5500
   const targetW = 1600;
-  const targetH = 5200;
+  const targetH = 5500;
 
   console.log(`Generating broad, non-squeezed Westeros cartographic map at ${targetW}x${targetH}...`);
 
@@ -48,10 +48,9 @@ async function makeBroadMagnificentMap() {
     }
   }
 
-  // Compute distance/gradient from coast into ocean for delicate nautical ripple waves
   const out = Buffer.alloc(w * h * 4);
 
-  console.log('Rendering anti-aliased coastlines, regional kingdom tones, and nautical wave contours...');
+  console.log('Rendering anti-aliased gold coastlines, regional kingdom tones, and nautical wave contours...');
 
   for (let y = 0; y < h; y++) {
     const yTop = Math.max(0, y - 1);
@@ -88,32 +87,23 @@ async function makeBroadMagnificentMap() {
         out[outIdx] = 251;
         out[outIdx + 1] = 191;
         out[outIdx + 2] = 36;
-        out[outIdx + 3] = Math.round(coastAlpha * 255 * (1.0 - oceanCenter * 0.35));
+        out[outIdx + 3] = Math.round(coastAlpha * 255 * (1.0 - oceanCenter * 0.25));
       } else if (lineAlpha > 0.12) {
         // Anti-aliased internal kingdom border
         out[outIdx] = 225;
         out[outIdx + 1] = 145;
         out[outIdx + 2] = 35;
         out[outIdx + 3] = Math.round(lineAlpha * 210);
-      } else if (oceanCenter >= 0.95) {
-        // Ocean waters: delicate, atmospheric deep sea shading so the map isn't an isolated floating bone!
-        // Subtle nautical wave contour ripples based on distance to center
-        const waveX = Math.sin(x * 0.04 + y * 0.015);
-        const waveY = Math.cos(y * 0.035 - x * 0.01);
-        const ripple = (waveX + waveY) * 0.5;
+      } else if (oceanCenter >= 0.85) {
+        // Ocean waters: luxurious, smooth antique nautical chart sea
+        // Smooth continuous wave contour drift (no harsh thresholds or dot artifacts)
+        const wave = Math.sin(y * 0.025 + Math.sin(x * 0.008) * 2.5);
+        const waveFactor = 0.5 + 0.5 * wave; // smooth 0.0 to 1.0
 
-        // Very subtle oceanic tint (deep navy mist) that blends into #08070b
-        if (ripple > 0.6) {
-          out[outIdx] = 18;
-          out[outIdx + 1] = 28;
-          out[outIdx + 2] = 45;
-          out[outIdx + 3] = 40; // Extremely subtle wave ripple
-        } else {
-          out[outIdx] = 12;
-          out[outIdx + 1] = 16;
-          out[outIdx + 2] = 26;
-          out[outIdx + 3] = 25; // Transparent deep sea tint
-        }
+        out[outIdx] = Math.round(10 + waveFactor * 5);
+        out[outIdx + 1] = Math.round(15 + waveFactor * 7);
+        out[outIdx + 2] = Math.round(24 + waveFactor * 12);
+        out[outIdx + 3] = 250;
       } else {
         // Landmass regional tints
         const isBeyondWall = (r > 225 && g > 225 && b > 220 && y < h * 0.17);
@@ -122,24 +112,24 @@ async function makeBroadMagnificentMap() {
 
         if (isBeyondWall) {
           out[outIdx] = 42;
-          out[outIdx + 1] = 56;
-          out[outIdx + 2] = 78;
-          out[outIdx + 3] = 180;
+          out[outIdx + 1] = 54;
+          out[outIdx + 2] = 72;
+          out[outIdx + 3] = 250;
         } else if (isDorne) {
-          out[outIdx] = 58;
+          out[outIdx] = 56;
           out[outIdx + 1] = 42;
           out[outIdx + 2] = 26;
-          out[outIdx + 3] = 180;
+          out[outIdx + 3] = 250;
         } else if (isNorth) {
-          out[outIdx] = 30;
-          out[outIdx + 1] = 42;
-          out[outIdx + 2] = 34;
-          out[outIdx + 3] = 180;
-        } else {
-          out[outIdx] = 34;
+          out[outIdx] = 28;
           out[outIdx + 1] = 38;
-          out[outIdx + 2] = 32;
-          out[outIdx + 3] = 180;
+          out[outIdx + 2] = 30;
+          out[outIdx + 3] = 250;
+        } else {
+          out[outIdx] = 32;
+          out[outIdx + 1] = 36;
+          out[outIdx + 2] = 30;
+          out[outIdx + 3] = 250;
         }
       }
     }
@@ -157,3 +147,4 @@ async function makeBroadMagnificentMap() {
 }
 
 makeBroadMagnificentMap().catch(console.error);
+
