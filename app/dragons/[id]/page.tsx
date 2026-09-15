@@ -73,6 +73,7 @@ export default async function DragonPage({ params }: PageProps) {
             
             {dragon.image ? (
               <DragonImage
+                dragonId={dragon.id}
                 src={dragon.image}
                 alt={dragon.name}
                 priority

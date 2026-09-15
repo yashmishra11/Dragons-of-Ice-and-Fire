@@ -7,6 +7,7 @@ import { FACTIONS, FactionId, getDragonFaction } from "@/data/factions";
 import { ERAS, EraId, isDragonInEra } from "@/data/timeline";
 import DragonImage from "@/components/DragonImage";
 import WesterosOutlineMap from "@/components/WesterosOutlineMap";
+import { useDragonTransition } from "@/components/DragonTransition";
 
 type MapSectionProps = {
   dragons: Dragon[];
@@ -30,6 +31,7 @@ function getNormalizedScale(rawScale?: number | null): number {
 }
 
 export default function MapSection({ dragons }: MapSectionProps) {
+  const { startTransition } = useDragonTransition();
   const [factionFilter, setFactionFilter] = useState<FactionId>("all");
   const [eraFilter, setEraFilter] = useState<EraId>("all");
 
@@ -221,6 +223,10 @@ export default function MapSection({ dragons }: MapSectionProps) {
                 >
                   <Link
                     href={`/dragons/${dragon.id}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      startTransition(dragon);
+                    }}
                     className="dragon-card-link flex flex-col items-center cursor-pointer"
                   >
                     <div className="relative flex items-center justify-center p-1.5 transition-transform duration-300 group-hover:scale-110">
@@ -249,6 +255,10 @@ export default function MapSection({ dragons }: MapSectionProps) {
                 >
                   <Link
                     href={`/dragons/${dragon.id}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      startTransition(dragon);
+                    }}
                     className="flex flex-col items-center gap-1 cursor-pointer"
                   >
                     {/* Antique Plaque resting directly atop the horizontal line */}
