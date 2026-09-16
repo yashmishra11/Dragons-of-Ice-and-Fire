@@ -12,6 +12,15 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://dragons-of-ice-and-fire.vercel.app"),
   title: "Dragons of Ice & Fire — Interactive Westeros Dragon Map & Lore",
   description: "Explore the legendary dragons of House Targaryen, wild dragons of Dragonstone, and their riders across Westeros.",
+  icons: {
+    icon: "/logo-emblem.png",
+    apple: "/logo-emblem.png",
+  },
+  openGraph: {
+    title: "Dragons of Ice & Fire — Interactive Westeros Dragon Map & Lore",
+    description: "Explore the legendary dragons of House Targaryen, wild dragons of Dragonstone, and their riders across Westeros.",
+    images: [{ url: "/logo-full.png", width: 1024, height: 1024, alt: "Dragons of Ice & Fire Logo" }],
+  },
 };
 
 export default function RootLayout({
