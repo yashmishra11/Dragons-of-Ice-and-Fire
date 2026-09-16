@@ -50,7 +50,7 @@ function SubmissionCard({
 
   return (
     <div className="bg-[#0d0c13]/90 border border-zinc-800/90 hover:border-amber-900/50 rounded-2xl p-6 shadow-2xl space-y-4 backdrop-blur-xl transition-all">
-      {/* Header Info000 */}
+      {/* Headergf Info000 */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800/80 pb-4">
         <div className="flex items-center gap-3.5">
           <div className="w-11 h-11 rounded-full bg-gradient-to-br from-amber-600/30 to-amber-950/80 border border-amber-500/40 flex items-center justify-center font-bold text-amber-300 text-xl shadow-inner font-cinzel">
