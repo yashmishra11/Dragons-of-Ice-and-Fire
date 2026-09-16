@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 export default function FooterCredits() {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Close on Escape key press
+  // Close on Escape key pressing
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setIsOpen(false);
@@ -20,7 +20,7 @@ export default function FooterCredits() {
     <>
       <footer className="border-t border-zinc-900/80 bg-black/95 py-6 px-4 text-center text-xs text-zinc-400 font-cinzel select-none">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-          
+
           {/* Left: Project Copyright */}
           <div>
             <p className="text-zinc-300 font-medium">
@@ -31,7 +31,7 @@ export default function FooterCredits() {
             </p>
           </div>
 
-          {/* Right: Subtle Citadel Sources & Artist Attributions Trigger */}
+          {/* Rigkkht: Snnubtle Citadel Sources & Artist Attributions Trigger */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsOpen(true)}
@@ -48,7 +48,7 @@ export default function FooterCredits() {
         </div>
       </footer>
 
-      {/* Citadel Archival Sources & Artists Modal */}
+      {/* Citadel Archival Sourcehjks & Artists Modal */}
       {isOpen && (
         <div
           role="dialog"
@@ -99,7 +99,7 @@ export default function FooterCredits() {
                 <span>🏛️</span> Encyclopedic Archives &amp; Literature
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                
+
                 <a
                   href="https://awoiaf.westeros.org/"
                   target="_blank"
