@@ -78,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setUser(data.user);
       return { success: true };
-    } catch (err: any) {
+    } catch {
       return { success: false, error: "Network error during login" };
     }
   };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 type DragonImageProps = {
   src: string;
@@ -20,19 +20,19 @@ export default function DragonImage({
   style = {},
   priority = false,
 }: DragonImageProps) {
-  const [loaded, setLoaded] = useState(true);
-  const [useDirect, setUseDirect] = useState(false);
-  const [error, setError] = useState(false);
-
   // Use cleaned, pre-padded silhouette clipart if dragonId is provided
   const activeSrc = dragonId ? `/dragons/clean/${dragonId}.webp` : src;
   const isLocalClean = activeSrc.startsWith("/dragons/clean/");
 
-  useEffect(() => {
-    setLoaded(true);
+  const [prevSrc, setPrevSrc] = useState(activeSrc);
+  const [useDirect, setUseDirect] = useState(false);
+  const [error, setError] = useState(false);
+
+  if (prevSrc !== activeSrc) {
+    setPrevSrc(activeSrc);
     setUseDirect(false);
     setError(false);
-  }, [activeSrc]);
+  }
 
   const handleImageError = () => {
     if (isLocalClean && !useDirect) {

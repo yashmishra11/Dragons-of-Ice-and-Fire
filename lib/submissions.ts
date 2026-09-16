@@ -3,46 +3,85 @@ import path from "path";
 import { DragonChangeSubmission } from "@/types/submission";
 import { Dragon } from "@/types/dragon";
 import { sendContributionAcknowledgementEmail } from "@/lib/email";
+import {
+  isDatabaseConfigured,
+  dbGetAllSubmissions,
+  dbGetSubmissionById,
+  dbCreateSubmission,
+  dbUpdateSubmissionStatus,
+  dbDeleteSubmission,
+} from "@/lib/db";
 
 const SUBMISSIONS_FILE = path.join(process.cwd(), "data", "submissions.json");
 const DRAGONS_FILE = path.join(process.cwd(), "data", "dragons.json");
 
 function ensureSubmissionsFile(): void {
-  const dir = path.dirname(SUBMISSIONS_FILE);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-  if (!fs.existsSync(SUBMISSIONS_FILE)) {
-    fs.writeFileSync(SUBMISSIONS_FILE, JSON.stringify([], null, 2), "utf-8");
+  try {
+    const dir = path.dirname(SUBMISSIONS_FILE);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    if (!fs.existsSync(SUBMISSIONS_FILE)) {
+      fs.writeFileSync(SUBMISSIONS_FILE, JSON.stringify([], null, 2), "utf-8");
+    }
+  } catch {
+    // Non-fatal if filesystem is read-only (e.g. Vercel)
   }
 }
 
-export function getAllSubmissions(): DragonChangeSubmission[] {
+function getLocalSubmissions(): DragonChangeSubmission[] {
   ensureSubmissionsFile();
   try {
     const raw = fs.readFileSync(SUBMISSIONS_FILE, "utf-8");
     return JSON.parse(raw);
-  } catch (error) {
-    console.error("Error reading submissions.json:", error);
+  } catch {
     return [];
   }
 }
 
-export function saveAllSubmissions(submissions: DragonChangeSubmission[]): void {
+function saveLocalSubmissions(submissions: DragonChangeSubmission[]): void {
   ensureSubmissionsFile();
-  fs.writeFileSync(
-    SUBMISSIONS_FILE,
-    JSON.stringify(submissions, null, 2),
-    "utf-8"
-  );
+  try {
+    fs.writeFileSync(
+      SUBMISSIONS_FILE,
+      JSON.stringify(submissions, null, 2),
+      "utf-8"
+    );
+  } catch {
+    // Non-fatal in read-only environment
+  }
 }
 
-export function getSubmissionById(id: string): DragonChangeSubmission | undefined {
-  const all = getAllSubmissions();
+export async function getAllSubmissions(): Promise<DragonChangeSubmission[]> {
+  if (isDatabaseConfigured()) {
+    try {
+      const submissions = await dbGetAllSubmissions();
+      if (submissions.length > 0) return submissions;
+    } catch (error) {
+      console.error("Database query failed in getAllSubmissions:", error);
+    }
+  }
+  return getLocalSubmissions();
+}
+
+export async function saveAllSubmissions(submissions: DragonChangeSubmission[]): Promise<void> {
+  saveLocalSubmissions(submissions);
+}
+
+export async function getSubmissionById(id: string): Promise<DragonChangeSubmission | undefined> {
+  if (isDatabaseConfigured()) {
+    try {
+      const sub = await dbGetSubmissionById(id);
+      if (sub) return sub;
+    } catch (error) {
+      console.error("Database query failed in getSubmissionById:", error);
+    }
+  }
+  const all = getLocalSubmissions();
   return all.find((s) => s.id === id);
 }
 
-export function createSubmission(data: {
+export async function createSubmission(data: {
   dragonId: string;
   dragonName?: string;
   proposedChanges: Partial<Dragon>;
@@ -53,9 +92,7 @@ export function createSubmission(data: {
     actualName?: string;
     email: string;
   };
-}): DragonChangeSubmission {
-  const all = getAllSubmissions();
-
+}): Promise<DragonChangeSubmission> {
   const newSub: DragonChangeSubmission = {
     id: `sub_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
     type: "edit-dragon",
@@ -68,17 +105,27 @@ export function createSubmission(data: {
     createdAt: new Date().toISOString(),
   };
 
+  if (isDatabaseConfigured()) {
+    try {
+      await dbCreateSubmission(newSub);
+    } catch (error) {
+      console.error("Database insert failed in createSubmission:", error);
+    }
+  }
+
+  const all = getLocalSubmissions();
   all.unshift(newSub);
-  saveAllSubmissions(all);
+  saveLocalSubmissions(all);
+
   return newSub;
 }
 
 /**
  * Acknowledges and accepts a submission:
  * 1. Sets status to 'accepted'
- * 2. Sets acknowledgedAt timestamp
+ * 2. Sets acknowledgedAt timestamp in DB and local store
  * 3. Applies the proposed changes to data/dragons.json
- * 4. Dispatches the sweet thank-you email to the contributor via Brevo SMTP
+ * 4. Dispatches acknowledgment email to the contributor
  */
 export async function acknowledgeSubmission(id: string): Promise<{
   success: boolean;
@@ -86,25 +133,42 @@ export async function acknowledgeSubmission(id: string): Promise<{
   emailSent?: boolean;
   error?: string;
 }> {
-  const all = getAllSubmissions();
-  const subIndex = all.findIndex((s) => s.id === id);
+  const sub = await getSubmissionById(id);
 
-  if (subIndex === -1) {
+  if (!sub) {
     return { success: false, error: "Submission not found" };
   }
 
-  const sub = all[subIndex];
+  const acknowledgedAt = new Date().toISOString();
+  const reviewedAt = acknowledgedAt;
+
   sub.status = "accepted";
-  sub.acknowledgedAt = new Date().toISOString();
-  sub.reviewedAt = new Date().toISOString();
+  sub.acknowledgedAt = acknowledgedAt;
+  sub.reviewedAt = reviewedAt;
+
+  if (isDatabaseConfigured()) {
+    try {
+      await dbUpdateSubmissionStatus(id, "accepted", {
+        acknowledgedAt,
+        reviewedAt,
+      });
+    } catch (error) {
+      console.error("Database update failed in acknowledgeSubmission:", error);
+    }
+  }
+
+  // Also update local copy
+  const all = getLocalSubmissions();
+  const subIndex = all.findIndex((s) => s.id === id);
+  if (subIndex !== -1) {
+    all[subIndex] = sub;
+    saveLocalSubmissions(all);
+  }
 
   // Apply proposed modifications to data/dragons.json
   applyChangesToDragon(sub.dragonId, sub.proposedChanges);
 
-  all[subIndex] = sub;
-  saveAllSubmissions(all);
-
-  // Prepare summary of changed fields for the sweet email
+  // Prepare summary of changed fields for the email
   const changesSummary = Object.entries(sub.proposedChanges)
     .map(([key, val]) => `• ${key}: "${val}"`)
     .join("<br/>");
@@ -128,44 +192,63 @@ export async function acknowledgeSubmission(id: string): Promise<{
 /**
  * Discards a submission (moves it to the discarded section).
  */
-export function discardSubmission(id: string): {
+export async function discardSubmission(id: string): Promise<{
   success: boolean;
   submission?: DragonChangeSubmission;
   error?: string;
-} {
-  const all = getAllSubmissions();
-  const subIndex = all.findIndex((s) => s.id === id);
+}> {
+  const sub = await getSubmissionById(id);
 
-  if (subIndex === -1) {
+  if (!sub) {
     return { success: false, error: "Submission not found" };
   }
 
-  const sub = all[subIndex];
-  sub.status = "discarded";
-  sub.discardedAt = new Date().toISOString();
-  sub.reviewedAt = new Date().toISOString();
+  const discardedAt = new Date().toISOString();
+  const reviewedAt = discardedAt;
 
-  all[subIndex] = sub;
-  saveAllSubmissions(all);
+  sub.status = "discarded";
+  sub.discardedAt = discardedAt;
+  sub.reviewedAt = reviewedAt;
+
+  if (isDatabaseConfigured()) {
+    try {
+      await dbUpdateSubmissionStatus(id, "discarded", {
+        reviewedAt,
+      });
+    } catch (error) {
+      console.error("Database update failed in discardSubmission:", error);
+    }
+  }
+
+  const all = getLocalSubmissions();
+  const subIndex = all.findIndex((s) => s.id === id);
+  if (subIndex !== -1) {
+    all[subIndex] = sub;
+    saveLocalSubmissions(all);
+  }
 
   return { success: true, submission: sub };
 }
 
 /**
- * Permanently purges a submission from data/submissions.json.
+ * Permanently purges a submission from database and data/submissions.json.
  */
-export function deleteSubmissionPermanently(id: string): {
+export async function deleteSubmissionPermanently(id: string): Promise<{
   success: boolean;
   error?: string;
-} {
-  const all = getAllSubmissions();
-  const filtered = all.filter((s) => s.id !== id);
-
-  if (filtered.length === all.length) {
-    return { success: false, error: "Submission not found" };
+}> {
+  if (isDatabaseConfigured()) {
+    try {
+      await dbDeleteSubmission(id);
+    } catch (error) {
+      console.error("Database delete failed in deleteSubmissionPermanently:", error);
+    }
   }
 
-  saveAllSubmissions(filtered);
+  const all = getLocalSubmissions();
+  const filtered = all.filter((s) => s.id !== id);
+
+  saveLocalSubmissions(filtered);
   return { success: true };
 }
 

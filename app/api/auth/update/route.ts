@@ -113,7 +113,7 @@ async function handleUpdate(req: Request) {
       user: toSafeUser(user),
       message: "Citadel profile record updated successfully!",
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error in /api/auth/update:", error);
     return NextResponse.json(
       { error: "Failed to update profile." },

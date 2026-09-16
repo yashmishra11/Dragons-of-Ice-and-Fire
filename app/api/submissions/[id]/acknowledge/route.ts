@@ -47,7 +47,7 @@ export async function POST(
       message:
         "Submission acknowledged & accepted! A sweet thank-you letter was dispatched to the scribe.",
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error acknowledging submission:", error);
     return NextResponse.json(
       { error: "Server error during acknowledgment." },

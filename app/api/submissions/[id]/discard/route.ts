@@ -45,7 +45,7 @@ export async function POST(
       submission: result.submission,
       message: "Submission discarded and moved to the Discarded section.",
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error discarding submission:", error);
     return NextResponse.json(
       { error: "Server error while discarding submission." },

@@ -127,9 +127,10 @@ export async function sendOtpEmail(
 
     console.log(`✅ Brevo SMTP email dispatched successfully to ${cleanEmail}`);
     return { success: true };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errMessage = error instanceof Error ? error.message : String(error);
     console.warn(
-      `⚠️ Brevo SMTP dispatch notice: ${error?.message || error}. Falling back to console OTP logging.`
+      `⚠️ Brevo SMTP dispatch notice: ${errMessage}. Falling back to console OTP logging.`
     );
     // Even if SMTP relay rejected the username, OTP is valid in memory and logged above
     return { success: true, devOtpLogged: true };
@@ -246,9 +247,10 @@ export async function sendContributionAcknowledgementEmail({
 
     console.log(`✅ Sweet acknowledgment raven delivered to ${cleanEmail}`);
     return { success: true };
-  } catch (error: any) {
-    console.warn(`⚠️ Brevo acknowledgement notice: ${error?.message || error}`);
-    return { success: false, error: error?.message || "Failed to dispatch email" };
+  } catch (error: unknown) {
+    const errMessage = error instanceof Error ? error.message : String(error);
+    console.warn(`⚠️ Brevo acknowledgement notice: ${errMessage}`);
+    return { success: false, error: errMessage || "Failed to dispatch email" };
   }
 }
 

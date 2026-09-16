@@ -11,11 +11,6 @@ type Props = {
 export default function SubmitDragonChange({ dragon }: Props) {
   const { user, role } = useAuth();
 
-  // Strict role check: Admin and Visitor cannot see or access the submit button
-  if (role !== "viewer" || !user) {
-    return null;
-  }
-
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [form, setForm] = useState<Partial<Dragon>>({});
@@ -23,13 +18,19 @@ export default function SubmitDragonChange({ dragon }: Props) {
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  // Strict role check: Admin and Visitor cannot see or access the submit button
+  if (role !== "viewer" || !user) {
+    return null;
+  }
+
   function handleChange<K extends keyof Dragon>(key: K, value: Dragon[K]) {
     const trimmed = typeof value === "string" ? value.trim() : value;
 
     setForm((prev) => {
       if (typeof trimmed === "string" && trimmed === "") {
-        const { [key]: _, ...rest } = prev;
-        return rest;
+        const next = { ...prev };
+        delete next[key];
+        return next;
       }
 
       return {
@@ -76,7 +77,7 @@ export default function SubmitDragonChange({ dragon }: Props) {
       } else {
         setSubmitted(true);
       }
-    } catch (err) {
+    } catch {
       setError("Network error communicating with the Citadel archives.");
     } finally {
       setLoading(false);

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import dragons from "@/data/dragons.json";
 import { Dragon } from "@/types/dragon";
@@ -47,20 +46,17 @@ export default function ComparePage() {
           </div>
 
           <div className="flex gap-2">
-            {["2", "28", "4"].map((presetId, idx) => (
-              <button
-                key={presetId}
-                onClick={() => setSelectedIds(["2", "28", "4"])}
-                className="text-xs bg-amber-950/60 hover:bg-amber-900/80 border border-amber-600/40 text-amber-300 px-3 py-1.5 rounded-lg font-cinzel font-semibold transition-all"
-              >
-                Conquest Trio
-              </button>
-            ))}
+            <button
+              onClick={() => setSelectedIds(["2", "28", "4"])}
+              className="text-xs bg-amber-950/60 hover:bg-amber-900/80 border border-amber-600/40 text-amber-300 px-3 py-1.5 rounded-lg font-cinzel font-semibold transition-all"
+            >
+              Conquest Trio
+            </button>
             <button
               onClick={() => setSelectedIds(["1", "28", "9"])}
               className="text-xs bg-red-950/60 hover:bg-red-900/80 border border-red-600/40 text-red-300 px-3 py-1.5 rounded-lg font-cinzel font-semibold transition-all"
             >
-              Rook's Rest Clash
+              Rook&apos;s Rest Clash
             </button>
           </div>
         </div>
@@ -89,12 +85,8 @@ export default function ComparePage() {
 
         {/* Side-by-side Comparison Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {selectedDragons.map((dragon, idx) => {
+          {selectedDragons.map((dragon) => {
             const faction = getDragonFaction(dragon.name);
-            const isBlendedImage =
-              dragon.name.toLowerCase() === "cannibal" ||
-              dragon.image.toLowerCase().includes("cannibal") ||
-              dragon.image.toLowerCase().includes("greyghost");
 
             return (
               <div
@@ -187,10 +179,10 @@ export default function ComparePage() {
 
             <div className="bg-zinc-900/60 p-4 rounded-xl border border-zinc-800 space-y-2">
               <span className="text-amber-400 font-cinzel font-bold text-sm block">
-                The Clashing of Skirmishers at Rook's Rest
+                The Clashing of Skirmishers at Rook&apos;s Rest
               </span>
               <p className="text-zinc-300 leading-relaxed">
-                Princess Rhaenys Targaryen on <span className="text-red-400 font-semibold">Meleys</span> fought both Aegon II on <span className="text-amber-400 font-semibold">Sunfyre</span> and Aemond on <span className="text-emerald-400 font-semibold">Vhagar</span> simultaneously. Meleys severed Sunfyre's wing before crashing to the field.
+                Princess Rhaenys Targaryen on <span className="text-red-400 font-semibold">Meleys</span> fought both Aegon II on <span className="text-amber-400 font-semibold">Sunfyre</span> and Aemond on <span className="text-emerald-400 font-semibold">Vhagar</span> simultaneously. Meleys severed Sunfyre&apos;s wing before crashing to the field.
               </p>
             </div>
           </div>

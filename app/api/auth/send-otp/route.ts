@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     const cleanEmail = email.trim().toLowerCase();
 
     // Check if email already registered
-    const existing = findUserByEmail(cleanEmail);
+    const existing = await findUserByEmail(cleanEmail);
     if (existing) {
       return NextResponse.json(
         { error: "An account with this email already exists. Please log in." },
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
         ? "Brevo relay notice: check server console for OTP."
         : undefined,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error in /api/auth/send-otp:", error);
     return NextResponse.json(
       { error: "Failed to dispatch verification email. Please try again." },

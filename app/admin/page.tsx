@@ -113,14 +113,14 @@ function SubmissionCard({
             </thead>
             <tbody className="divide-y divide-zinc-900/80 font-sans">
               {changeEntries.map(([key, val]) => {
-                const currentValue = dragon ? (dragon as any)[key] : "Unknown";
+                const currentValue = dragon ? (dragon as unknown as Record<string, unknown>)[key] : "Unknown";
                 return (
                   <tr key={key} className="hover:bg-zinc-900/40 transition-colors">
                     <td className="p-3 font-semibold text-amber-400 capitalize font-cinzel text-[11px]">
                       {key}
                     </td>
                     <td className="p-3 text-zinc-400 text-xs">
-                      {currentValue || <span className="italic text-zinc-600">None / Blank</span>}
+                      {currentValue ? String(currentValue) : <span className="italic text-zinc-600">None / Blank</span>}
                     </td>
                     <td className="p-3 text-emerald-300 bg-emerald-950/15 font-medium text-xs">
                       {String(val)}
@@ -139,7 +139,7 @@ function SubmissionCard({
           📜 Scholar Citation / Historical Rationale:
         </span>
         <p className="text-zinc-200 italic font-serif leading-relaxed">
-          "{submission.reason}"
+          &ldquo;{submission.reason}&rdquo;
         </p>
       </div>
 
@@ -264,7 +264,7 @@ export default function AdminPage() {
           `✨ Contribution acknowledged! A sweet royal thank-you letter was dispatched to ${data.submission?.submittedBy?.email || "the contributor"}.`
         );
       }
-    } catch (err) {
+    } catch {
       setToastMessage("⚠️ Network error while dispatching acknowledgment raven.");
     } finally {
       setActionLoadingId(null);
@@ -290,7 +290,7 @@ export default function AdminPage() {
         );
         setToastMessage("🗑️ Submission discarded and moved to the Discarded section.");
       }
-    } catch (err) {
+    } catch {
       setToastMessage("⚠️ Network error while discarding submission.");
     } finally {
       setActionLoadingId(null);
@@ -318,7 +318,7 @@ export default function AdminPage() {
         setSubmissions((prev) => prev.filter((s) => s.id !== id));
         setToastMessage("❌ Submission permanently erased from the Citadel archives.");
       }
-    } catch (err) {
+    } catch {
       setToastMessage("⚠️ Network error while erasing submission.");
     } finally {
       setActionLoadingId(null);
@@ -467,7 +467,7 @@ export default function AdminPage() {
                   : "🗑️"}
               </span>
               <h3 className="text-zinc-200 font-cinzel font-bold text-base">
-                No suggestions in the "{activeTab}" section
+                No suggestions in the &ldquo;{activeTab}&rdquo; section
               </h3>
               <p className="text-xs text-zinc-500 max-w-sm mx-auto">
                 {activeTab === "submitted"

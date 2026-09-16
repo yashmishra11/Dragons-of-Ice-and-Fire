@@ -48,7 +48,7 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json({ success: true, submissions: all });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error fetching submissions:", error);
     return NextResponse.json(
       { error: "Failed to retrieve archives." },
@@ -117,7 +117,7 @@ export async function POST(req: Request) {
       submission: newSubmission,
       message: "Your lore correction has been submitted to the Citadel review queue.",
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error creating submission:", error);
     return NextResponse.json(
       { error: "Failed to submit correction to the archives." },

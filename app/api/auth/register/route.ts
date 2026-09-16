@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import {
-  getAllUsers,
-  saveAllUsers,
+  createUser,
   findUserByUsername,
   findUserByEmail,
   hashPassword,
@@ -41,7 +40,7 @@ export async function POST(req: Request) {
     }
 
     // 2. Uniqueness check for username
-    const existingUsername = findUserByUsername(cleanUsername);
+    const existingUsername = await findUserByUsername(cleanUsername);
     if (existingUsername) {
       return NextResponse.json(
         { error: "This username is already taken. Please choose another display name." },
@@ -67,7 +66,7 @@ export async function POST(req: Request) {
     }
 
     const cleanEmail = email.trim().toLowerCase();
-    const existingEmail = findUserByEmail(cleanEmail);
+    const existingEmail = await findUserByEmail(cleanEmail);
     if (existingEmail) {
       return NextResponse.json(
         { error: "An account with this email already exists." },
@@ -137,9 +136,7 @@ export async function POST(req: Request) {
       updatedAt: new Date().toISOString(),
     };
 
-    const users = getAllUsers();
-    users.push(newUser);
-    saveAllUsers(users);
+    await createUser(newUser);
 
     const safeUser = toSafeUser(newUser);
 
@@ -159,7 +156,7 @@ export async function POST(req: Request) {
     });
 
     return response;
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error in /api/auth/register:", error);
     return NextResponse.json(
       { error: "Failed to create account. Please try again." },

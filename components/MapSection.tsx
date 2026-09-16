@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState, useMemo } from "react";
 import { Dragon } from "@/types/dragon";
 import { FACTIONS, FactionId, getDragonFaction } from "@/data/factions";
-import { ERAS, EraId, isDragonInEra } from "@/data/timeline";
+import { EraId, isDragonInEra } from "@/data/timeline";
 import DragonImage from "@/components/DragonImage";
 import WesterosOutlineMap from "@/components/WesterosOutlineMap";
 import { useDragonTransition } from "@/components/DragonTransition";
@@ -180,7 +180,7 @@ export default function MapSection({ dragons }: MapSectionProps) {
           filteredDragons.map((dragon, index) => {
             const faction = getDragonFaction(dragon.name);
             const isWild = faction.id === "wild" || !dragon.rider || dragon.rider === "None" || dragon.rider.toLowerCase().includes("none");
-            const normalizedScale = getNormalizedScale((dragon as any).scale);
+            const normalizedScale = getNormalizedScale((dragon as Dragon & { scale?: number }).scale);
 
             // In filtered mode: compact alternating cadence.
             // In full map mode: canonical collision-free positions with min 330px gap.

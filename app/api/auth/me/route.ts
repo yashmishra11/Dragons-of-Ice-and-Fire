@@ -22,13 +22,13 @@ export async function GET() {
       return NextResponse.json({ user: null });
     }
 
-    const user = findUserById(parsed.userId);
+    const user = await findUserById(parsed.userId);
     if (!user) {
       return NextResponse.json({ user: null });
     }
 
     return NextResponse.json({ user: toSafeUser(user) });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error in /api/auth/me:", error);
     return NextResponse.json({ user: null });
   }

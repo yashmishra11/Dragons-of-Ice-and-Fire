@@ -41,7 +41,10 @@ export function DragonTransitionProvider({ children }: { children: React.ReactNo
   const router = useRouter();
   const pathname = usePathname();
   const pathnameRef = useRef(pathname);
-  pathnameRef.current = pathname;
+
+  useEffect(() => {
+    pathnameRef.current = pathname;
+  }, [pathname]);
 
   const [activeDragon, setActiveDragon] = useState<DragonTransitionTarget | null>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -151,7 +154,7 @@ export function DragonTransitionProvider({ children }: { children: React.ReactNo
           // If already on that specific dragon page, skip
           if (pathnameRef.current === `/dragons/${targetId}`) return;
 
-          const dragon = (dragonsData as any[]).find((d) => String(d.id) === String(targetId));
+          const dragon = (dragonsData as unknown as DragonTransitionTarget[]).find((d) => String(d.id) === String(targetId));
           if (dragon) {
             e.preventDefault();
             e.stopPropagation();

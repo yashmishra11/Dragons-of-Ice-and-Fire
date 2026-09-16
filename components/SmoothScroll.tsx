@@ -38,7 +38,7 @@ export default function SmoothScroll() {
     rafId = requestAnimationFrame(raf);
 
     // Scroll listener for progress and regional milestone awareness
-    const onScroll = (e: any) => {
+    const onScroll = () => {
       const scrollY = window.scrollY || document.documentElement.scrollTop;
       const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
       const progress = totalHeight > 0 ? Math.min(100, Math.max(0, (scrollY / totalHeight) * 100)) : 0;

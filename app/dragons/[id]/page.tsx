@@ -1,4 +1,4 @@
-import Image from "next/image";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import dragons from "@/data/dragons.json";
@@ -12,6 +12,48 @@ type PageProps = {
     id: string;
   }>;
 };
+
+export async function generateStaticParams() {
+  return (dragons as Dragon[]).map((d) => ({
+    id: d.id,
+  }));
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const dragon = (dragons as Dragon[]).find((d) => d.id === id);
+  if (!dragon) {
+    return {
+      title: "Dragon Lore Archive | Dragons of Ice & Fire",
+    };
+  }
+
+  const aliasOrRider = dragon.alias || dragon.rider || "Legendary Dragon of Westeros";
+  const desc = `${dragon.name} (${aliasOrRider}) — Citadel archival record, rider lineage, scale coloration, and historical chronicles.`;
+
+  return {
+    title: `${dragon.name} — Lore & Chronicle | Dragons of Ice & Fire`,
+    description: desc,
+    openGraph: {
+      title: `${dragon.name} — Dragons of Ice & Fire`,
+      description: desc,
+      images: [
+        {
+          url: `/dragons/clean/${dragon.id}.webp`,
+          width: 800,
+          height: 600,
+          alt: `${dragon.name} silhouette`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${dragon.name} — Dragons of Ice & Fire`,
+      description: desc,
+      images: [`/dragons/clean/${dragon.id}.webp`],
+    },
+  };
+}
 
 export default async function DragonPage({ params }: PageProps) {
   const { id } = await params;

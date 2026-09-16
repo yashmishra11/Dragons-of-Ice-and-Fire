@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     const cleanInput = username.trim();
     // Allow login via username or email
     const user =
-      findUserByUsername(cleanInput) || findUserByEmail(cleanInput);
+      (await findUserByUsername(cleanInput)) || (await findUserByEmail(cleanInput));
 
     if (!user) {
       return NextResponse.json(
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
     });
 
     return response;
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error in /api/auth/login:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred during login." },
