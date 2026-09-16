@@ -3,7 +3,14 @@ import { CitadelUser } from "@/types/user";
 import { DragonChangeSubmission } from "@/types/submission";
 
 export function getDatabaseUrl(): string | null {
-  return process.env.DATABASE_URL || process.env.POSTGRES_URL || null;
+  return (
+    process.env.POSTGRES_URL ||
+    process.env.DATABASE_URL ||
+    process.env.STORAGE_URL ||
+    process.env.POSTGRES_PRISMA_URL ||
+    process.env.POSTGRES_URL_NON_POOLING ||
+    null
+  );
 }
 
 export function isDatabaseConfigured(): boolean {
