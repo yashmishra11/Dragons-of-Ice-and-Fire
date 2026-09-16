@@ -89,9 +89,25 @@ export default async function DragonPage({ params }: PageProps) {
               </div>
             )}
 
-            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between bg-black/70 backdrop-blur-md px-4 py-2 rounded-xl border border-zinc-800">
-              <span className="text-xs text-zinc-400 font-cinzel">Vault Registry ID</span>
-              <span className="text-xs font-mono font-bold text-amber-400">#{dragon.id}</span>
+            <div className="absolute bottom-4 left-4 right-4 flex flex-col gap-1.5 bg-black/75 backdrop-blur-md px-3.5 py-2 rounded-xl border border-zinc-800/90 shadow-lg">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-zinc-400 font-cinzel">Vault Registry ID</span>
+                <span className="text-xs font-mono font-bold text-amber-400">#{dragon.id}</span>
+              </div>
+              <div className="flex items-center justify-between pt-1 border-t border-zinc-800/70 text-[10px]">
+                <span className="text-zinc-500 font-cinzel flex items-center gap-1">
+                  <span>🎨</span> Illustration
+                </span>
+                <a
+                  href="https://awoiaf.westeros.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-amber-400/80 hover:text-amber-300 font-cinzel font-medium flex items-center gap-0.5 transition-colors"
+                >
+                  <span>Citadel Archive</span>
+                  <span className="text-[9px]">↗</span>
+                </a>
+              </div>
             </div>
           </div>
 
@@ -144,8 +160,22 @@ export default async function DragonPage({ params }: PageProps) {
               <h2 className="text-base font-cinzel font-bold text-amber-300 flex items-center gap-2">
                 <span>📚</span> Historical Chronicle
               </h2>
-              <div className="bg-zinc-900/40 p-4 rounded-xl border border-zinc-900">
+              <div className="bg-zinc-900/40 p-4 rounded-xl border border-zinc-900 space-y-2">
                 <HistoryToggle text={dragon.history || "No historical chronicle exists for this dragon."} />
+                <div className="pt-2 border-t border-zinc-800/60 flex flex-wrap items-center justify-between gap-1 text-[11px] text-zinc-500 font-cinzel">
+                  <span className="italic flex items-center gap-1.5">
+                    <span>📜</span> Chronicle sourced from Citadel archives via{" "}
+                    <a
+                      href="https://awoiaf.westeros.org/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-amber-400/70 hover:text-amber-300 underline underline-offset-2 transition-colors"
+                    >
+                      A Wiki of Ice and Fire
+                    </a>
+                  </span>
+                  <span className="text-[10px] text-zinc-600 font-mono">CC-BY-SA 3.0</span>
+                </div>
               </div>
             </section>
 
