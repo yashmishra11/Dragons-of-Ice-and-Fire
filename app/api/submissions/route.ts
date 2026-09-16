@@ -13,7 +13,7 @@ async function getAuthenticatedUser() {
   try {
     const parsed = JSON.parse(sessionCookie.value);
     if (!parsed?.userId) return null;
-    return findUserById(parsed.userId) || null;
+    return (await findUserById(parsed.userId)) || null;
   } catch {
     return null;
   }
@@ -25,7 +25,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const statusParam = searchParams.get("status");
 
-    let all = getAllSubmissions();
+    let all = await getAllSubmissions();
 
     // If visitor, forbid or return empty
     if (!user) {
@@ -99,7 +99,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const newSubmission = createSubmission({
+    const newSubmission = await createSubmission({
       dragonId,
       dragonName,
       proposedChanges,

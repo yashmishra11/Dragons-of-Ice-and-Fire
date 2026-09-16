@@ -10,7 +10,7 @@ async function getAdminUser() {
   try {
     const parsed = JSON.parse(sessionCookie.value);
     if (!parsed?.userId) return null;
-    const user = findUserById(parsed.userId);
+    const user = await findUserById(parsed.userId);
     return user?.role === "admin" ? user : null;
   } catch {
     return null;
@@ -26,7 +26,7 @@ async function handleDelete(id: string) {
     );
   }
 
-  const result = deleteSubmissionPermanently(id);
+  const result = await deleteSubmissionPermanently(id);
   if (!result.success) {
     return NextResponse.json(
       { error: result.error || "Submission not found." },

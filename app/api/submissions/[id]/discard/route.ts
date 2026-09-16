@@ -10,7 +10,7 @@ async function getAdminUser() {
   try {
     const parsed = JSON.parse(sessionCookie.value);
     if (!parsed?.userId) return null;
-    const user = findUserById(parsed.userId);
+    const user = await findUserById(parsed.userId);
     return user?.role === "admin" ? user : null;
   } catch {
     return null;
@@ -31,7 +31,7 @@ export async function POST(
     }
 
     const { id } = await params;
-    const result = discardSubmission(id);
+    const result = await discardSubmission(id);
 
     if (!result.success) {
       return NextResponse.json(

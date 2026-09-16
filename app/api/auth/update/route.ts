@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import {
-  getAllUsers,
-  saveAllUsers,
+  updateUser,
   findUserById,
   findUserByUsername,
   toSafeUser,
@@ -36,7 +35,7 @@ async function handleUpdate(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const user = findUserById(parsed.userId);
+    const user = await findUserById(parsed.userId);
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
@@ -63,7 +62,7 @@ async function handleUpdate(req: Request) {
 
       // If changing username, check if taken by someone else
       if (cleanUsername.toLowerCase() !== user.username.toLowerCase()) {
-        const existing = findUserByUsername(cleanUsername);
+        const existing = await findUserByUsername(cleanUsername);
         if (existing && existing.id !== user.id) {
           return NextResponse.json(
             { error: "This display name / username is already taken." },
@@ -101,16 +100,16 @@ async function handleUpdate(req: Request) {
 
     user.updatedAt = new Date().toISOString();
 
-    const users = getAllUsers();
-    const idx = users.findIndex((u) => u.id === user.id);
-    if (idx !== -1) {
-      users[idx] = user;
-      saveAllUsers(users);
-    }
+    const updated = await updateUser(user.id, {
+      actualName: user.actualName,
+      username: user.username,
+      age: user.age,
+      phone: user.phone,
+    });
 
     return NextResponse.json({
       success: true,
-      user: toSafeUser(user),
+      user: toSafeUser(updated || user),
       message: "Citadel profile record updated successfully!",
     });
   } catch (error) {
