@@ -3,7 +3,7 @@ import { DragonTransitionProvider } from "@/components/DragonTransition";
 import Header from "@/components/Header";
 import SmoothScroll from "@/components/SmoothScroll";
 import type { Metadata } from "next";
-// @ts-ignore: CSS module type declarations are not present in this project
+
 import "./globals.css";
 
 import FooterCredits from "@/components/FooterCredits";
@@ -32,4 +32,4 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
+}
