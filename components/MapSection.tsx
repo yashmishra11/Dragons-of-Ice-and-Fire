@@ -88,68 +88,68 @@ export default function MapSection({ dragons }: MapSectionProps) {
 
   return (
     <div className="relative w-full bg-[#08070b]">
-      {/* Sleek Single-Row House Allegiance Sticky Toolbar (No Thick Slider/Scrollbar) */}
-      <div className="sticky top-[53px] z-40 bg-zinc-950/95 backdrop-blur-xl border-b border-amber-900/30 px-3 sm:px-6 py-1.5 shadow-2xl flex flex-wrap items-center justify-between gap-2 text-xs">
-        
-        {/* Left: Allegiance House Quick Filter Pills */}
-        <div
-          className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 flex-nowrap"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
-          <span className="text-[11px] font-cinzel font-bold text-amber-400/90 tracking-wider uppercase mr-1 hidden sm:inline">
-            Allegiance:
-          </span>
-          {(Object.keys(FACTIONS) as FactionId[]).map((fId) => {
-            const fac = FACTIONS[fId];
-            const isActive = factionFilter === fId;
-
-            return (
-              <button
-                key={fId}
-                onClick={() => setFactionFilter(fId)}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-cinzel transition-all whitespace-nowrap cursor-pointer ${
-                  isActive
-                    ? fac.colorClass + " border border-amber-400/80 shadow-[0_0_10px_rgba(245,158,11,0.25)] font-bold scale-[1.02]"
-                    : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/80 border border-zinc-800/80 bg-zinc-950/80 font-medium"
-                }`}
-                title={fac.description}
-              >
-                <span>{fac.sigil}</span>
-                <span className="font-semibold">{fac.name}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Right: Link to Dedicated Timeline Page + Counter & Reset */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <Link
-            href="/timeline"
-            className="flex items-center gap-1.5 text-[11px] font-cinzel font-bold text-amber-300 hover:text-amber-100 bg-amber-950/60 hover:bg-amber-900/80 border border-amber-700/50 px-2.5 py-1 rounded-md transition-all shadow-md"
+      {/* Sleek Single-Row House Allegiance Sticky Toolbar */}
+      <div className="sticky top-[53px] z-40 bg-zinc-950/95 backdrop-blur-xl border-b border-amber-900/30 px-3 sm:px-6 py-1.5 shadow-2xl">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 text-xs">
+          {/* Left: Allegiance House Quick Filter Pills */}
+          <div
+            className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 flex-nowrap"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            <span>📜</span>
-            <span>Historical Eras →</span>
-          </Link>
+            <span className="text-[11px] font-cinzel font-bold text-amber-400/90 tracking-wider uppercase mr-1 hidden sm:inline">
+              Allegiance:
+            </span>
+            {(Object.keys(FACTIONS) as FactionId[]).map((fId) => {
+              const fac = FACTIONS[fId];
+              const isActive = factionFilter === fId;
 
-          {isFiltered && (
-            <button
-              onClick={() => {
-                setFactionFilter("all");
-                setEraFilter("all");
-              }}
-              className="text-[11px] font-cinzel text-red-400 hover:text-red-300 font-bold bg-red-950/50 hover:bg-red-900/70 px-2 py-1 rounded-md border border-red-800/60 transition-all cursor-pointer flex items-center gap-1"
-              title="Reset all active filters"
+              return (
+                <button
+                  key={fId}
+                  onClick={() => setFactionFilter(fId)}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-cinzel transition-all whitespace-nowrap cursor-pointer ${
+                    isActive
+                      ? fac.colorClass + " border border-amber-400/80 shadow-[0_0_10px_rgba(245,158,11,0.25)] font-bold scale-[1.02]"
+                      : "text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/80 border border-zinc-800/80 bg-zinc-950/80 font-medium"
+                  }`}
+                  title={fac.description}
+                >
+                  <span>{fac.sigil}</span>
+                  <span className="font-semibold">{fac.name}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Right: Link to Dedicated Timeline Page + Counter & Reset */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <Link
+              href="/timeline"
+              className="flex items-center gap-1.5 text-[11px] font-cinzel font-bold text-amber-300 hover:text-amber-100 bg-amber-950/60 hover:bg-amber-900/80 border border-amber-700/50 px-2.5 py-1 rounded-md transition-all shadow-md"
             >
-              <span>Reset</span>
-              <span className="text-[10px]">✕</span>
-            </button>
-          )}
+              <span>📜</span>
+              <span>Historical Eras →</span>
+            </Link>
 
-          <span className="text-[11px] font-mono font-bold text-amber-300 bg-amber-950/80 border border-amber-700/60 px-2.5 py-0.5 rounded-full shadow-md whitespace-nowrap">
-            {filteredDragons.length} dragons
-          </span>
+            {isFiltered && (
+              <button
+                onClick={() => {
+                  setFactionFilter("all");
+                  setEraFilter("all");
+                }}
+                className="text-[11px] font-cinzel text-red-400 hover:text-red-300 font-bold bg-red-950/50 hover:bg-red-900/70 px-2 py-1 rounded-md border border-red-800/60 transition-all cursor-pointer flex items-center gap-1"
+                title="Reset all active filters"
+              >
+                <span>Reset</span>
+                <span className="text-[10px]">✕</span>
+              </button>
+            )}
+
+            <span className="text-[11px] font-mono font-bold text-amber-300 bg-amber-950/80 border border-amber-700/60 px-2.5 py-0.5 rounded-full shadow-md whitespace-nowrap">
+              {filteredDragons.length} dragons
+            </span>
+          </div>
         </div>
-
       </div>
 
       {/* Map Graphic Container - Spanning Natural Westeros Canvas */}
