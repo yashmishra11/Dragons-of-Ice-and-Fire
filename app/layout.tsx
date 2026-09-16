@@ -9,6 +9,7 @@ import "./globals.css";
 import FooterCredits from "@/components/FooterCredits";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://dragons-of-ice-and-fire.vercel.app"),
   title: "Dragons of Ice & Fire — Interactive Westeros Dragon Map & Lore",
   description: "Explore the legendary dragons of House Targaryen, wild dragons of Dragonstone, and their riders across Westeros.",
 };

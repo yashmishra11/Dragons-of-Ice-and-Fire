@@ -63,7 +63,7 @@ export default function SmoothScroll() {
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll(null);
+    onScroll();
 
     return () => {
       window.removeEventListener("scroll", onScroll);

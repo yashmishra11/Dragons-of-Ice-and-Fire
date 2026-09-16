@@ -28,8 +28,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const aliasOrRider = dragon.alias || dragon.rider || "Legendary Dragon of Westeros";
-  const desc = `${dragon.name} (${aliasOrRider}) — Citadel archival record, rider lineage, scale coloration, and historical chronicles.`;
+  const riderOrInfo = dragon.rider || "Legendary Dragon of Westeros";
+  const desc = `${dragon.name} (${riderOrInfo}) — Citadel archival record, rider lineage, ${dragon.colors}, and historical chronicles.`;
 
   return {
     title: `${dragon.name} — Lore & Chronicle | Dragons of Ice & Fire`,

@@ -171,7 +171,7 @@ export async function createUser(user: CitadelUser): Promise<void> {
 
 export async function updateUser(
   id: string,
-  updates: Partial<Pick<CitadelUser, "actualName" | "username" | "passwordHash" | "role">>
+  updates: Partial<CitadelUser>
 ): Promise<CitadelUser | undefined> {
   if (isDatabaseConfigured()) {
     try {

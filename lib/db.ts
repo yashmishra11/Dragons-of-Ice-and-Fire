@@ -46,7 +46,8 @@ export async function initTablesIfNecessary(): Promise<void> {
         created_at TEXT NOT NULL,
         reviewed_at TEXT,
         acknowledged_at TEXT,
-        reviewer_notes TEXT
+        discarded_at TEXT,
+        acknowledgement_note TEXT
       );
     `;
     tablesInitialized = true;
@@ -61,9 +62,12 @@ function mapRowToUser(row: Record<string, unknown>): CitadelUser {
     actualName: String(row.actual_name),
     username: String(row.username),
     email: String(row.email),
+    age: row.age ? Number(row.age) : 25,
+    phone: row.phone ? String(row.phone) : "",
     passwordHash: String(row.password_hash),
     role: row.role as CitadelUser["role"],
     createdAt: String(row.created_at),
+    updatedAt: row.updated_at ? String(row.updated_at) : String(row.created_at),
   };
 }
 
@@ -84,7 +88,8 @@ function mapRowToSubmission(row: Record<string, unknown>): DragonChangeSubmissio
     createdAt: String(row.created_at),
     reviewedAt: row.reviewed_at ? String(row.reviewed_at) : undefined,
     acknowledgedAt: row.acknowledged_at ? String(row.acknowledged_at) : undefined,
-    reviewerNotes: row.reviewer_notes ? String(row.reviewer_notes) : undefined,
+    discardedAt: row.discarded_at ? String(row.discarded_at) : undefined,
+    acknowledgementNote: row.acknowledgement_note ? String(row.acknowledgement_note) : undefined,
   };
 }
 
@@ -161,15 +166,15 @@ export async function dbCreateUser(user: CitadelUser): Promise<void> {
 
   const sql = neon(url);
   await sql`
-    INSERT INTO citadel_users (id, actual_name, username, email, password_hash, role, created_at)
-    VALUES (${user.id}, ${user.actualName}, ${user.username}, ${user.email}, ${user.passwordHash}, ${user.role}, ${user.createdAt})
+    INSERT INTO citadel_users (id, actual_name, username, email, age, phone, password_hash, role, created_at)
+    VALUES (${user.id}, ${user.actualName}, ${user.username}, ${user.email}, ${user.age ?? 25}, ${user.phone ?? ""}, ${user.passwordHash}, ${user.role}, ${user.createdAt})
     ON CONFLICT (id) DO NOTHING;
   `;
 }
 
 export async function dbUpdateUser(
   id: string,
-  updates: Partial<Pick<CitadelUser, "actualName" | "username" | "passwordHash" | "role">>
+  updates: Partial<CitadelUser>
 ): Promise<void> {
   const url = getDatabaseUrl();
   if (!url) return;
@@ -181,6 +186,12 @@ export async function dbUpdateUser(
   }
   if (updates.username) {
     await sql`UPDATE citadel_users SET username = ${updates.username} WHERE id = ${id}`;
+  }
+  if (updates.age !== undefined) {
+    await sql`UPDATE citadel_users SET age = ${updates.age} WHERE id = ${id}`;
+  }
+  if (updates.phone !== undefined) {
+    await sql`UPDATE citadel_users SET phone = ${updates.phone} WHERE id = ${id}`;
   }
   if (updates.passwordHash) {
     await sql`UPDATE citadel_users SET password_hash = ${updates.passwordHash} WHERE id = ${id}`;
@@ -243,7 +254,12 @@ export async function dbCreateSubmission(sub: DragonChangeSubmission): Promise<v
 export async function dbUpdateSubmissionStatus(
   id: string,
   status: DragonChangeSubmission["status"],
-  metadata?: { reviewedAt?: string; acknowledgedAt?: string; reviewerNotes?: string }
+  metadata?: {
+    reviewedAt?: string;
+    acknowledgedAt?: string;
+    discardedAt?: string;
+    acknowledgementNote?: string;
+  }
 ): Promise<void> {
   const url = getDatabaseUrl();
   if (!url) return;
@@ -255,7 +271,8 @@ export async function dbUpdateSubmissionStatus(
     SET status = ${status},
         reviewed_at = COALESCE(${metadata?.reviewedAt ?? null}, reviewed_at),
         acknowledged_at = COALESCE(${metadata?.acknowledgedAt ?? null}, acknowledged_at),
-        reviewer_notes = COALESCE(${metadata?.reviewerNotes ?? null}, reviewer_notes)
+        discarded_at = COALESCE(${metadata?.discardedAt ?? null}, discarded_at),
+        acknowledgement_note = COALESCE(${metadata?.acknowledgementNote ?? null}, acknowledgement_note)
     WHERE id = ${id};
   `;
 }
